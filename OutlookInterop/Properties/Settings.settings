@@ -1,0 +1,26 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="OutlookInterop.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="WufooSenderEmail" Type="System.String" Scope="User">
+      <Value Profile="(Default)">"no-reply@wufoo.com"</Value>
+    </Setting>
+    <Setting Name="MagentoSenderEmail" Type="System.String" Scope="User">
+      <Value Profile="(Default)">secureorders@fergusonplarre.com.au</Value>
+    </Setting>
+    <Setting Name="WufooSenders" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;Custom Cakes&lt;/string&gt;
+  &lt;string&gt;Custom Cake Order&lt;/string&gt;
+  &lt;string&gt;Wufoo&lt;/string&gt;
+  &lt;string&gt;Decorating Room&lt;/string&gt;
+  &lt;string&gt;Vegan / Flourless Cake Order&lt;/string&gt;
+  &lt;string&gt;Cookie Cake Order Form&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+    <Setting Name="Setting" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
