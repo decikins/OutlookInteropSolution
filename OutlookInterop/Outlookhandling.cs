@@ -22,8 +22,6 @@ namespace OutlookInterop {
             @"C:\Users\decroom\source\repos\OutlookInteropSolution\OutlookInterop\Example Orders";
         //Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("Example Orders").First().FullName
 
-        private static string removeMe = "yo yo yo";
-
         private static bool _exitHandlerEnabled = false;
 
         public static Application OutlookApp;
@@ -61,6 +59,8 @@ namespace OutlookInterop {
                 ((ApplicationEvents_11_Event)OutlookApp).Quit += _OutlookHandling_Quit;
                 _exitHandlerEnabled = true;
             }
+        }
+        public static void CheckUserDefinedProperties() {
         }
         private static void _OutlookHandling_Quit() {
             Trace.Write("Outlook instance closed, exiting...");
@@ -134,13 +134,13 @@ namespace OutlookInterop {
             magentoOrdersUnformatted = magentoOrdersUnformatted.Where(
                     (item, i) => {
                         pbar.Report((((double)i / (double)totalOrders)) / 2);
-                        return item.UserProperties.Find(UserPropertyNames.DateFormatted) == null;
+                        return item.UserProperties.Find(UserPropertyNames.DATE_FORMATTED) == null;
                     }).ToList();
             for (int i = 0; i < magentoOrdersUnformatted.Count; i++) {
                 _ReformatDate(magentoOrdersUnformatted[i]);
                 UserProperty dateFormatted =
                     magentoOrdersUnformatted[i].UserProperties.Add(
-                        UserPropertyNames.DateFormatted, OlUserPropertyType.olText, true);
+                        UserPropertyNames.DATE_FORMATTED, OlUserPropertyType.olText, true);
                 DisableVisiblePrintUserProp(dateFormatted);
                 dateFormatted.Value = "Date Formatted";
                 magentoOrdersUnformatted[i].Save();
@@ -185,9 +185,9 @@ namespace OutlookInterop {
             ProgressBar pbar = new ProgressBar();
             pbar.Report(0);
             int totalItems = items.Count;
-            for (int i = 1; i <= totalItems; i++) {
+            for (int i = totalItems; i > 1; i--) {
                 _ParseOrder((MailItem)items[i]);
-                pbar.Report((double)i / (double)(totalItems+1));
+                pbar.Report((double)(totalItems - i) / (double)(totalItems+1));
             }
             pbar.Dispose();
             Console.WriteLine("Complete");
@@ -198,7 +198,13 @@ namespace OutlookInterop {
             }
             if (item.SenderEmailAddress == OrderTypeInfo.MagentoSenderEmail) {
                 _ReformatDate(item);
-                item.UnRead = Magento.ParseOrder(item.HTMLBody);
+                bool toBeProcessed = Magento.ParseOrder(item.HTMLBody);
+                if (!toBeProcessed) {
+                    item.UnRead = false;
+                    UserProperty parsed = item.UserProperties.Add(UserPropertyNames.PARSED, OlUserPropertyType.olText, true);
+                    DisableVisiblePrintUserProp(parsed);
+                    item.Move(DeletedItems);
+                }
             }
         }
 
@@ -523,7 +529,8 @@ namespace OutlookInterop {
 
 
     struct UserPropertyNames {
-        public static readonly string DateFormatted = "Date Formatted";
+        public const string DATE_FORMATTED = "Date Formatted";
+        public const string PARSED = "Parsed";
     }
 
     struct OrderTypeFilter {
