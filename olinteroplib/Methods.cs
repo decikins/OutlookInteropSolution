@@ -13,8 +13,6 @@ namespace olinteroplib
         private static readonly string subfolders = @"http://schemas.microsoft.com/mapi/proptag/0x360A000B";
         public static string PR_ATTR_HIDDEN { get { return hidden; } }
         public static string PR_SUBFOLDERS { get { return subfolders; } }
-
-        public static string killme = "yo yo yo";
     }
 
     public static class Tracer {

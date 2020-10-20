@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Diagnostics;
-using static OutlookInterop.OutlookHandling;
-using System.Windows.Forms;
+using static FPBInterop.OutlookHandling.OutlookHandling;
 
 
 namespace OutlookInterop {
@@ -41,35 +40,9 @@ namespace OutlookInterop {
 
             SetupOutlookRefs();
 
-
-            if (args.Contains("-w")) {
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new Window());
-            }
-            else
-                UserInputLoop();
-
-            CleanUpAndExit();
+            UserInputLoop();
         }
 
-        public static void CleanUpAndExit() {
-            if (CleanupCompleted)
-                return;
-
-            if (TestingFolderScenario && DeleteTestFolderOnExit)
-                StopTestEnvironment();
-
-            if (ClearCategoriesOnExit)
-                OutlookHandling.ClearCategories();
-
-            //if (OutlookApp.Explorers.Count == 0)
-
-            CleanupCompleted = true;
-            Trace.WriteLine("Cleanup completed, exiting");
-
-            Environment.Exit(0);
-        }
         private static void UserInputLoop() {
             do {
                 Console.Write("->");
@@ -108,7 +81,7 @@ namespace OutlookInterop {
                         else
                             Trace.WriteLine("Please specify maximum number of items to duplicate: \"setuptest\" XX");
 
-                        if (SetupDefaultTest(int.Parse(inputArgs[1]), stringArg))
+                        if (SetupDefaultTestEnv(int.Parse(inputArgs[1]), stringArg))
                             TestingFolderScenario = true;
                         break;
                     case "-s":
@@ -117,11 +90,14 @@ namespace OutlookInterop {
                         break;
                     case "-st":
                     case "stoptest":
-                        StopTestEnvironment();
+                        StopTestEnv();
                         break;
                     case "-p":
                     case "parseorders":
-                        ParseOrders(stringArg);
+                        if (String.IsNullOrEmpty(stringArg))
+                            ParseSelectedOrder();
+                        else
+                            ParseOrdersInFolder(stringArg);
                         break;
                     /*case "help":
                         ShowHelp();

@@ -2,7 +2,7 @@
 using System.Text;
 using System.Threading;
 
-namespace OutlookInterop
+namespace FPBInterop
 {
 	/// <summary>
 	/// An ASCII progress bar

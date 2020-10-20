@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30225.117
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutlookInterop", "OutlookInterop.csproj", "{8DFFFC27-1A30-4538-B228-B4361C2D4518}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp.csproj", "{8DFFFC27-1A30-4538-B228-B4361C2D4518}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "olinteroplib", "..\olinteroplib\olinteroplib.csproj", "{BD267CF0-B39E-4F42-B854-933D1D1BE283}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FPBInterop", "..\FPBOutlookHandling\FPBInterop.csproj", "{06C118F4-1A81-4C95-B348-957A3CBFBB2B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{BD267CF0-B39E-4F42-B854-933D1D1BE283}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD267CF0-B39E-4F42-B854-933D1D1BE283}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD267CF0-B39E-4F42-B854-933D1D1BE283}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06C118F4-1A81-4C95-B348-957A3CBFBB2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06C118F4-1A81-4C95-B348-957A3CBFBB2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06C118F4-1A81-4C95-B348-957A3CBFBB2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06C118F4-1A81-4C95-B348-957A3CBFBB2B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
