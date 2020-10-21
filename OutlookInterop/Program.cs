@@ -12,14 +12,10 @@ namespace OutlookInterop {
 
     /// PROPERTIES ///
 
-        private static readonly bool DeleteTestFolderOnExit = true;
-        private static readonly bool ClearCategoriesOnExit = true;
-        private static bool TestingFolderScenario;
         private static bool TraceToLogFile;
 
         private static List<Franchise> StoreList = new List<Franchise>();
 
-        private static bool CleanupCompleted = false;
         public static bool ApplicationIsExiting = false;
 
         private static readonly ConsoleTraceListener ConsoleTracer = new ConsoleTraceListener();
@@ -80,9 +76,6 @@ namespace OutlookInterop {
                         }
                         else
                             Trace.WriteLine("Please specify maximum number of items to duplicate: \"setuptest\" XX");
-
-                        if (SetupDefaultTestEnv(int.Parse(inputArgs[1]), stringArg))
-                            TestingFolderScenario = true;
                         break;
                     case "-s":
                     case "save":
