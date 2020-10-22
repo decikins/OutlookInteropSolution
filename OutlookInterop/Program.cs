@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Diagnostics;
-using static FPBInterop.OutlookHandling.OutlookHandling;
+using static FPBInterop.OutlookHandling;
 
 
 namespace OutlookInterop {
@@ -16,14 +16,11 @@ namespace OutlookInterop {
 
         private static List<Franchise> StoreList = new List<Franchise>();
 
-        public static bool ApplicationIsExiting = false;
-
         private static readonly ConsoleTraceListener ConsoleTracer = new ConsoleTraceListener();
 
     /// METHODS ///
 
         static void Main(string[] args) {
-
             Trace.AutoFlush = true;
             TraceToLogFile = args.Contains("-l");
             Trace.WriteLine($"Write to log set to {TraceToLogFile.ToString().ToLower()}");
@@ -40,6 +37,7 @@ namespace OutlookInterop {
         }
 
         private static void UserInputLoop() {
+            bool ApplicationIsExiting = false;
             do {
                 Console.Write("->");
                 string input = Console.ReadLine();

@@ -12,7 +12,7 @@ using static olinteroplib.Methods;
 using olinteroplib.ExtensionMethods;
 
 namespace FPBInterop {
-        class OutlookHandling {
+        public class OutlookHandling {
 
         /// PROPERTIES ///
 
