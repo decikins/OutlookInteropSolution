@@ -22,7 +22,6 @@ namespace olinteroplib
     }
 
     public static class Methods {
-        
         public static void EnumerateFolders(List<Folder> folderList, Folder startFolder, bool includeHiddenFolders) {
             TraceOutput.TraceEvent(TraceEventType.Information, 0, $"Enumerating {startFolder.Folders.Count} folders in {startFolder.Name}");
             if (!startFolder.HasSubfolders()) {
@@ -42,7 +41,6 @@ namespace olinteroplib
                 }
             }
         }
-
         public static void DisableVisiblePrintUserProp(UserProperty prop) {
             long printablePropertyFlag = 0x4; // PDO_PRINT_SAVEAS
             string printablePropertyCode = "[DispID=107]";
@@ -77,7 +75,6 @@ namespace olinteroplib
             }
             return categoryList;
         }
-
         public static string ConvertToString(List<string> categoryList) {
             string categories = String.Empty;
             foreach (string s in categoryList) {
@@ -92,7 +89,6 @@ namespace olinteroplib
 
     namespace ExtensionMethods {
         public static class ExtensionMethods {
-
             private static int HasIMAPIProperty(this Folder folder, string propertyTag) {
                 try {
                     bool hasProp = (bool)folder.PropertyAccessor.GetProperty(propertyTag);

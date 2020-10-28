@@ -12,10 +12,10 @@ using static olinteroplib.Methods;
 using olinteroplib.ExtensionMethods;
 
 namespace FPBInterop {
-        public class OutlookHandling {
+    public class OutlookHandling {
 
         /// PROPERTIES ///
-
+        private static readonly TraceSource Tracer = new TraceSource("FPBInterop.OutlookHandling");
         private static string Desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         private static string ExampleOrdersFolder =
             @"C:\Users\decroom\source\repos\OutlookInteropSolution\OutlookInterop\Example Orders";
@@ -63,7 +63,7 @@ namespace FPBInterop {
 
         }
         private static void _OutlookHandling_Quit() {
-            Trace.Write("Outlook instance closed, exiting...");
+            Tracer.TraceEvent(TraceEventType.Information,0,"Outlook instance closed, exiting...");
             StopTestEnv();
         }
 
@@ -81,7 +81,7 @@ namespace FPBInterop {
             try {
                 Items matches = folder.Items.Restrict(_MagentoSenderName);
                 if (matches.Count == 0)
-                    throw new System.ArgumentException();
+                    throw new ArgumentException();
 
                 for (int i = 0; i < matches.Count; i++) {
                     MailItem currentItem = (MailItem)matches[i + 1];
@@ -89,8 +89,8 @@ namespace FPBInterop {
                         MagentoOrders.Add(currentItem);
                 }
             }
-            catch (ArgumentException) { Trace.WriteLine($"No Magento items found in folder {folder.Name}"); }
-            catch (System.Exception) { Trace.WriteLine("Getting Magento order list failed"); }
+            catch (ArgumentException) { Tracer.TraceEvent(TraceEventType.Information, 0, $"No Magento items found in folder {folder.Name}"); }
+            catch (System.Exception) { Tracer.TraceEvent(TraceEventType.Error, 0, "Getting Magento order list failed"); }
 
             return MagentoOrders;
         }
@@ -108,8 +108,8 @@ namespace FPBInterop {
                     WufooOrders.Add(currentItem);
                 }
             }
-            catch (ArgumentException) { Trace.WriteLine($"No Magento items found in folder {folder.Name}"); }
-            catch (System.Exception) { Trace.WriteLine("Getting Magento order list failed"); }
+            catch (ArgumentException) { Tracer.TraceEvent(TraceEventType.Information, 0, $"No Wufoo items found in folder {folder.Name}"); }
+            catch (System.Exception) { Tracer.TraceEvent(TraceEventType.Error, 0, "Getting Wufoo order list failed"); }
 
             return WufooOrders;
         }
@@ -119,12 +119,11 @@ namespace FPBInterop {
         }
         public static void ReformatMagentoDates(Folder folder) {
             if (folder == null) {
-                Console.WriteLine("Invalid folder or path");
-                Trace.WriteLine("Invalid folder or path");
+                Tracer.TraceEvent(TraceEventType.Error,0,"Invalid folder or path");
                 return;
             }
 
-            Trace.WriteLine($"Begin formatting dates in target folder {folder.Name}");
+            Tracer.TraceEvent(TraceEventType.Verbose,0,$"Begin formatting dates in target folder {folder.Name}");
 
             ProgressBar pbar = new ProgressBar();
             pbar.Report(0);
@@ -147,8 +146,7 @@ namespace FPBInterop {
                 pbar.Report((double)0.5 + ((double)i / (double)magentoOrdersUnformatted.Count) / (double)2);
             }
             pbar.Dispose();
-            Console.WriteLine("Formatting dates complete");
-            Trace.WriteLine("Formatting dates complete");
+            Tracer.TraceEvent(TraceEventType.Verbose, 0, "Formatting dates complete");
         }
         private static bool _ReformatDate(MailItem item) {
             CultureInfo provider = CultureInfo.InvariantCulture;
@@ -175,31 +173,32 @@ namespace FPBInterop {
             return true;
         }
 
-        public static void ParseSelectedOrder() {
-            _ParseOrder((MailItem)OutlookApp.ActiveExplorer().Selection[1]);
+        public static void ProcessSelectedOrder() {
+            _ProcessOrder((MailItem)OutlookApp.ActiveExplorer().Selection[1]);
         }
-        public static void ParseOrdersInFolder(string folderPath) {
-            ParseOrdersInCollection(_GetFolderSwitch(folderPath).Items);
+        public static void ProcessFolder(string folderPath) {
+            ProcessItems(_GetFolderSwitch(folderPath).Items);
         }
-        public static void ParseOrdersInFolder(Folder folder) {
-            ParseOrdersInCollection(folder.Items);
+        public static void ProcessFolder(Folder folder) {
+            ProcessItems(folder.Items);
         }
-        public static void ParseOrdersInCollection(Items items) {
+        public static void ProcessItems(Items items) {
             ProgressBar pbar = new ProgressBar();
             pbar.Report(0);
             int totalItems = items.Count;
-            for (int i = totalItems; i > 1; i--) {
-                _ParseOrder((MailItem)items[i]);
+            for (int i = totalItems; i > 0; i--) {
+                _ProcessOrder((MailItem)items[i]);
                 pbar.Report((double)(totalItems - i) / (double)(totalItems + 1));
             }
             pbar.Dispose();
             Console.WriteLine("Complete");
         }
-        private static void _ParseOrder(MailItem item) {
+        private static void _ProcessOrder(MailItem item) {
             if (item.SenderEmailAddress == OrderTypeInfo.WufooSenderEmail) {
 
             }
             if (item.SenderEmailAddress == OrderTypeInfo.MagentoSenderEmail) {
+                Tracer.TraceEvent(TraceEventType.Verbose, 0, item.Subject.Remove(0,27));
                 _ReformatDate(item);
                 bool toBeProcessed = HTMLHandling.Magento.ParseOrder(item.HTMLBody);
                 if (!toBeProcessed) {
@@ -207,6 +206,9 @@ namespace FPBInterop {
                     UserProperty parsed = item.UserProperties.Add(UserPropertyNames.PARSED, OlUserPropertyType.olText, true);
                     DisableVisiblePrintUserProp(parsed);
                     item.Move(DeletedItems);
+                }
+                else {
+                    item.UnRead = true;
                 }
             }
         }
@@ -227,7 +229,7 @@ namespace FPBInterop {
                     return target;
                 }
                 catch {
-                    Trace.WriteLine("Invalid path");
+                    Tracer.TraceEvent(TraceEventType.Verbose, 0, "Invalid path");
                     return null;
                 }
             }
@@ -246,14 +248,14 @@ namespace FPBInterop {
                         Folders subFolders = folder.Folders;
                         folder = subFolders.GetFolder(folders[i]);
                         if (folder == null) {
-                            Trace.WriteLine("Folder not found at path");
+                            Tracer.TraceEvent(TraceEventType.Verbose, 0, "Folder not found at path");
                             return null;
                         }
                     }
                 }
             }
             catch {
-                Trace.WriteLine("Folder not found at path");
+                Tracer.TraceEvent(TraceEventType.Verbose, 0, "Folder not found at path");
                 return null;
             }
             return folder;
@@ -290,18 +292,18 @@ namespace FPBInterop {
             }
             else {
                 try {
-                    Trace.WriteLine($"Target folder set as option " +
+                    Tracer.TraceEvent(TraceEventType.Verbose, 0, $"Target folder set as option " +
                         $"{result + 1}, {matches[result].Parent().Name}\\{matches[result].Name}");
                     return matches[result];
                 }
                 catch (System.Exception e) {
-                    Trace.WriteLine($"Failed!\n{e.Message}");
+                    Tracer.TraceEvent(TraceEventType.Verbose, 0, $"Failed!\n{e.Message}");
                     return null;
                 }
             }
         }
         private static int _ConsoleUserDecision(string message, string[] options) {
-            Trace.WriteLine(message);
+            Console.WriteLine(message);
             int i = 1;
             foreach (string option in options) {
                 Console.WriteLine($"[{i}]. {option}");
@@ -320,7 +322,7 @@ namespace FPBInterop {
 
                 if (isInt) {
                     if (keyChar > 0 && keyChar <= options.Count()) {
-                        Trace.WriteLine($"Option {keyChar}. {options[keyChar - 1]} selected");
+                        Console.WriteLine($"Option {keyChar}. {options[keyChar - 1]} selected");
                         return keyChar - 1;
                     }
                     else {
@@ -338,20 +340,20 @@ namespace FPBInterop {
             return _SetupTestEnv(DeletedItems, RootFolder, _testFolderName, maxItems, sourceItemFilter);
         }
         public static void StopTestEnv() {
-            Trace.WriteLine("Begin test scenario cleanup");
+            Tracer.TraceEvent(TraceEventType.Verbose, 0, "Begin test scenario cleanup");
             try {
                 DeletedItems.Folders[TestFolder].Delete();
             }
             catch { }
 
             if (TestFolder == null)
-                Trace.WriteLine("TestFolder is null, teststartup was not run");
+                Tracer.TraceEvent(TraceEventType.Verbose, 0, "TestFolder is null, teststartup was not run");
 
             try {
                 TestFolder = (Folder)_testFolderParent.Folders[TestFolder.Name];
             }
             catch {
-                Trace.WriteLine("Cannot set test folder as existing test folder");
+                Tracer.TraceEvent(TraceEventType.Verbose, 0, "Cannot set test folder as existing test folder");
             }
             if (TestFolder.Items.Count != _testItems.Count)
                 foreach (MailItem item in TestFolder.Items) {
@@ -359,22 +361,22 @@ namespace FPBInterop {
                         _testItems.Remove(item);
                 }
 
-            Trace.WriteLine("Cleaning testing scenario");
+            Tracer.TraceEvent(TraceEventType.Verbose, 0, "Cleaning testing scenario");
             while (_testItems.Count > 0) {
                 _testItems[0].Delete();
                 _testItems.Remove(_testItems[0]);
-                Trace.WriteLine("Items remaining " + _testItems.Count);
+                Tracer.TraceEvent(TraceEventType.Verbose, 0, "Items remaining " + _testItems.Count);
             }
 
-            Trace.Write("Deleting test folder");
+            Tracer.TraceEvent(TraceEventType.Verbose, 0, "Deleting test folder");
             TestFolder.MoveTo(DeletedItems);
             while (DeletedItems.Folders.Count == 0) { Thread.Sleep(100); }
             try {
                 TestFolder.Delete();
-                Trace.WriteLine(" - complete");
+                Tracer.TraceEvent(TraceEventType.Verbose, 0, " - complete");
                 TestFolder = null;
             }
-            catch { Trace.WriteLine(" - failed!"); }
+            catch { Tracer.TraceEvent(TraceEventType.Verbose, 0, " - failed!"); }
 
             _testSetup = false;
         }
@@ -382,12 +384,12 @@ namespace FPBInterop {
             if (_testSetup)
                 return true;
 
-            Trace.WriteLine($"Begin setup test folder and populate with {maxItems} item(s)");
+            Tracer.TraceEvent(TraceEventType.Verbose, 0, $"Begin setup test folder and populate with {maxItems} item(s)");
             if (sourceItemFilter != null)
-                Trace.WriteLine($"\t - and apply filter {sourceItemFilter}");
+                Tracer.TraceEvent(TraceEventType.Verbose, 0, $"\t - and apply filter {sourceItemFilter}");
 
             if (itemSourceFolder.Items.Count == 0) {
-                Trace.WriteLine("No valid items in source folder. Try another folder.");
+                Tracer.TraceEvent(TraceEventType.Verbose, 0, "No valid items in source folder. Try another folder.");
                 return false;
             }
 
@@ -395,10 +397,10 @@ namespace FPBInterop {
             if (sourceItemFilter != null)
                 try {
                     FilteredItems = itemSourceFolder.Items.Restrict(sourceItemFilter);
-                    Trace.WriteLine("Filter successful");
+                    Tracer.TraceEvent(TraceEventType.Verbose, 0, "Filter successful");
                 }
                 catch (System.Exception e) {
-                    Trace.WriteLine("Failed to filter items, " + e.Message);
+                    Tracer.TraceEvent(TraceEventType.Verbose, 0, "Failed to filter items, " + e.Message);
                     return false;
                 };
 
@@ -412,12 +414,12 @@ namespace FPBInterop {
                 TestFolder = (Folder)parentFolder.Folders.Add(testFolderName);
                 while (TestFolder == null) { Thread.Sleep(200); };
             }
-            Trace.WriteLine($"Folder already exists: {alreadyExists}");
+            Tracer.TraceEvent(TraceEventType.Verbose, 0, $"Folder already exists: {alreadyExists}");
 
             _testItems = new List<MailItem>();
             List<MailItem> itemsToBeDuplicated = new List<MailItem>();
             maxItems = (maxItems > FilteredItems.Count) ? FilteredItems.Count : maxItems;
-            Trace.WriteLine($"maxItems set to {maxItems}");
+            Tracer.TraceEvent(TraceEventType.Verbose, 0, $"maxItems set to {maxItems}");
 
             if (alreadyExists) {
                 foreach (MailItem item in TestFolder.Items) {
@@ -442,12 +444,12 @@ namespace FPBInterop {
                     _testItems.Add(copy);
                     copy.Move(TestFolder);
                 }
-                Trace.WriteLine("\t Complete");
+                Tracer.TraceEvent(TraceEventType.Verbose, 0, "\t Complete");
                 _testSetup = true;
                 return true;
             }
             catch {
-                Trace.WriteLine("\t Failed");
+                Tracer.TraceEvent(TraceEventType.Verbose, 0, "\t Failed");
                 return false;
             }
         }
@@ -486,46 +488,44 @@ namespace FPBInterop {
         // MISCELLANEOUS METHODS
 
         private static DateTime _GetFirstSundayAfterDate(DateTime date) {
-            Trace.Write($"Getting first Sunday after date {date:dd/MM} - ");
+            Tracer.TraceEvent(TraceEventType.Verbose, 0, $"Getting first Sunday after date {date:dd/MM} - ");
             DateTime sunday = date;
             while (sunday.DayOfWeek != 0) {
-                Trace.Write(sunday.ToString());
+                Tracer.TraceEvent(TraceEventType.Verbose, 0, sunday.ToString());
                 sunday = sunday.AddDays(1);
             }
-            Trace.WriteLine($" - complete");
+            Tracer.TraceEvent(TraceEventType.Verbose, 0, $" - complete");
             return sunday;//.ToString("MMM dd").ToUpper(); ;
         }
 
-
         internal static void SetupCategories() {
-            Trace.Write("Begin setup categories");
+            Tracer.TraceEvent(TraceEventType.Verbose, 0, "Begin setup categories");
             FieldInfo[] categoryList = typeof(OrderTypeInfo).GetFields();
             foreach (FieldInfo prop in categoryList) {
 
                 //string categoryName = prop.GetValue("Tag");
-                Trace.WriteLine(prop.ToString());
+                Tracer.TraceEvent(TraceEventType.Verbose, 0, prop.ToString());
                 /*try
                 {
                     Category category = OutlookApp.Session.Categories[prop.GetValue(null)];
                     if (category == null)
                     {
                         OutlookApp.Session.Categories.Add(categoryName);
-                        Trace.WriteLine($"Adding category {categoryName}");
+                        Tracer.TraceEvent(TraceEventType.Verbose, 0, $"Adding category {categoryName}");
                     }
                     else
-                        Trace.WriteLine($"Category {categoryName} already exists");
+                        Tracer.TraceEvent(TraceEventType.Verbose, 0, $"Category {categoryName} already exists");
                 }
                 catch
                 {
                     OutlookApp.Session.Categories.Add(categoryName);
-                    Trace.WriteLine($"Adding category {categoryName}");
+                    Tracer.TraceEvent(TraceEventType.Verbose, 0, $"Adding category {categoryName}");
                 }*/
             }
-            Trace.WriteLine(" - complete");
+            Tracer.TraceEvent(TraceEventType.Verbose, 0, " - complete");
         }
-
         internal static void ClearCategories() {
-            Trace.WriteLine("Begin clearing categories");
+            Tracer.TraceEvent(TraceEventType.Verbose, 0, "Begin clearing categories");
 
         }
     }
