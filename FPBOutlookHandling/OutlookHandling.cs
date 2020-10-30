@@ -173,6 +173,27 @@ namespace FPBInterop {
             return true;
         }
 
+        public static void RescueMisfiledOrders() {
+            DateTime dt = new DateTime(2020, 10, 12);
+            Console.WriteLine("Getting orders");
+            Items orders = DeletedItems.Items.Restrict(_MagentoSenderName);
+            orders = orders.Restrict("[ReceivedTime]>'" + dt.ToString("g")+"'");
+
+            Console.WriteLine("start process");
+            for (int i = orders.Count; i >= 1; i --) {
+
+                MailItem temp = (MailItem)orders[i];
+                string subj = temp.Subject;
+                if (!subj.StartsWith("Ferguson Plarre: New Order"))
+                    continue;
+                string orderNum = subj.Remove(0, 27);
+                Trace.Write(orderNum);
+                bool toBeReturned = HTMLHandling.Magento.ParseOrderSpecial(temp.HTMLBody);
+                if (toBeReturned) {
+                    Trace.WriteLine(" REDO");
+                }
+            }
+        }
         public static void ProcessSelectedOrder() {
             _ProcessOrder((MailItem)OutlookApp.ActiveExplorer().Selection[1]);
         }

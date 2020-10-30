@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HtmlHandling.cs" />
+    <Compile Include="OrderMetadata.cs" />
     <Compile Include="OutlookHandling.cs" />
     <Compile Include="ProgressBar.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

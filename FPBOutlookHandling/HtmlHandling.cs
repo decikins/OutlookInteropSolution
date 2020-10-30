@@ -50,6 +50,72 @@ namespace FPBInterop {
                 return CheckProductTable(HTMLDoc);
             }
 
+            public static bool ParseOrderSpecial(string HTMLBody) {
+                HTMLBody = Regex.Replace(HTMLBody, "\n|\r|\t", "");
+                HtmlDocument HTMLDoc = new HtmlDocument();
+                HTMLDoc.LoadHtml(HTMLBody);
+
+                return CheckProductTableSpecial(HTMLDoc);
+            }
+
+            public static bool CheckProductTableSpecial(HtmlDocument HtmlBody) {
+                HtmlNode productTable = //HtmlBody.DocumentNode.SelectSingleNode(productTableXPath);
+                HtmlBody.DocumentNode.Descendants().Where(
+                    n => n.NodeType == HtmlNodeType.Text
+                    && n.InnerText.Trim(' ') == "Quantity").Single().Ancestors("table").First();
+
+                HtmlNodeCollection rows;
+                try {
+                    rows = productTable.SelectNodes(@".//tr");
+                }
+                catch (NullReferenceException) {
+                    Trace.WriteLine(" SKIPPED ");
+                    return false;
+                }
+
+                bool mustProcess = false;
+                bool firstProductIgnored = false;
+                for (int i = 1; i < rows.Count - 1; i++) {
+                    if (rows[i].ParentNode.Name != "tbody")
+                        continue;
+
+                    if (rows[i].Descendants("td").Count() < 2)
+                        continue;
+
+                    HtmlNode toOrderCell = rows[i].SelectSingleNode(".//td[2]");
+                    if (toOrderCell == null)
+                        continue;
+
+                    HtmlNode productCell = rows[i].SelectSingleNode(".//td[1]");
+                    bool ignoreProduct;
+                    try {
+                        ignoreProduct = toOrderCell.FirstChild.InnerText == "Y";
+                    }
+                    catch (Exception) {
+                        continue;
+                    }
+                    if (i == 1 & ignoreProduct == true) {
+                        //Trace.WriteLine("\tIgnored First Product: True");
+                        firstProductIgnored = true;
+                    }
+
+                    if (!ignoreProduct) {
+                       // Trace.WriteLine("\tMust Process: True");
+                        mustProcess = true;
+                        break;
+                    }
+                    else
+                        continue;
+                }
+                if (mustProcess & firstProductIgnored) {
+                    //Trace.WriteLine("\tProbably fuck up, move back to deleted items");
+                    return true;
+                }
+                else
+                    Trace.WriteLine(" safe");
+                    return false;
+            }
+
             public static bool CheckProductTable(HtmlDocument HtmlBody) {
 
                 HtmlNode productTable = HtmlBody.DocumentNode.SelectSingleNode(productTableXPath);
@@ -92,22 +158,22 @@ namespace FPBInterop {
                     if (skuCode.Length > 35)
                         skuCode = $"{skuCode.Substring(0, 35)}...";
 
-                    traceInfo.Append($"\n|\t{productName}\n" +
+                    traceInfo.Append($"|\t{productName}\n" +
                         $"|\t\t{skuCode};\n" +
                         $"|\t\tPrice:\t{singlePrice};\n" +
                         $"|\t\tQuantity:\t{quantity};\n" +
-                        $"|\t\tTotal:\t{totalPrice};" +
-                        $"\n|\tIgnore product: {ignoreProduct}");
+                        $"|\t\tTotal:\t{totalPrice};\n" +
+                        $"|\tIgnore product: {ignoreProduct}\n");
 
                     if (!ignoreProduct) {
-                        traceInfo.Append(traceInfo + "\nMust be processed\n");
+                        traceInfo.Append("|Must be processed\n");
                         Tracer.TraceEvent(TraceEventType.Information, 0, traceInfo.ToString());
                         return true;
                     }
                     else
                         continue;
                 }
-                traceInfo.Append("\nProcessing not necessary, moving to Deleted Items\n");
+                traceInfo.Append("|Processing not necessary, moving to Deleted Items\n");
                 Tracer.TraceEvent(TraceEventType.Information, 0, traceInfo.ToString());
                 return false;
             }

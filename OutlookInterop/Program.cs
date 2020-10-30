@@ -121,6 +121,10 @@ namespace FPBInteropConsole {
                         else
                             ProcessFolder(stringArg);
                         break;
+
+                    case "ohshit":
+                        RescueMisfiledOrders();
+                        break;                        
                     /*case "help":
                         ShowHelp();
                         break;*/
@@ -196,6 +200,22 @@ namespace FPBInteropConsole {
         }
         public void TraceEvent(string message) {
             Trace.WriteLine(message);
+        }
+    }
+
+    public class NoHeaderLogListener : TextWriterTraceListener {
+        public NoHeaderLogListener(string logFileName) : base(logFileName) {
+            base.Writer = new StreamWriter(logFileName, false);
+        }
+
+        public override void Write(string message) {
+            base.Writer.Write(message);
+        }
+        public override void WriteLine(string message) {
+            base.Writer.WriteLine(message);
+        }
+        public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message) {
+            base.Writer.WriteLine(message);
         }
     }
 }
