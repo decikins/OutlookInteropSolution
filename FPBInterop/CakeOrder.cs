@@ -9,11 +9,12 @@ using System.Diagnostics;
 
 namespace FPBInterop {
 	internal abstract class BaseOrder {
-		public int store;
-		public string storename;
-		public string email;
-		public DateTime deliveryDate;
-		public DateTime deliveryDay;
+		public int Store { get; private set; }
+		public string StoreName { get; private set; }
+		public string Email { get; private set; }
+		public DateTime DeliveryDate { get; private set; }
+
+		public BaseOrder() { }
 	}
 
 	internal abstract class Tier {
@@ -43,29 +44,54 @@ namespace FPBInterop {
 	}
 
 	public static class SideColour {
-		private static XmlDocument ColourChart = new XmlDocument();
-		public sealed class TierColour {
-			public string Name { get; private set; }
-			public bool Fondant { get; private set; }
-			public bool Sprinkle { get; private set; }
-			public bool Coconut { get; private set; }
+		public static Dictionary<int, Colour> Colours = new Dictionary<int, Colour>();
 
-			public TierColour(string name, bool fondant, bool sprinkle, bool coconut) {
-				Name = name;
-				Fondant = fondant;
-				Sprinkle = sprinkle;
-				Coconut = coconut;
+		private const string ColourChartXml = "./ColourChart.xml";
+		private static XmlDocument ColourChart = new XmlDocument();
+
+		public static void GetColours() {
+			if (!ColourChart.HasChildNodes)
+				ColourChart.Load(ColourChartXml);
+
+			XmlNode sideColours = ColourChart.SelectSingleNode("//sideColours");
+			int index = 0;
+			foreach (XmlNode node in sideColours) {
+				if (node.Name != "colour" || node.Attributes.Count==0)
+					continue;
+
+				string name;
+				bool fondant;
+				bool sprinkle;
+				bool coconut;
+				try {
+					name = node.Attributes.GetNamedItem("name").Value;
+					fondant = bool.Parse(node.Attributes.GetNamedItem("fondant").Value);
+					sprinkle = bool.Parse(node.Attributes.GetNamedItem("sprinkle").Value);
+					coconut = bool.Parse(node.Attributes.GetNamedItem("coconut").Value);
+				}
+				catch (Exception e) {
+					Trace.WriteLine($"Could not parse colour xml: {e.Message}");
+					return;
+				}
+
+				Colour colour = new Colour(name, fondant, sprinkle, coconut);
+				Colours.Add(index++, colour);
 			}
+			Trace.WriteLine(Colours.Count);
 		}
 
 		public static void AddColour(string name, bool fondant, bool sprinkle, bool coconut) {
 			if (!ColourChart.HasChildNodes)
-				ColourChart.Load("./ColourChart.xml");
+				ColourChart.Load(ColourChartXml);
 
-			XmlNode root = ColourChart.DocumentElement;
+			if (ColourChart.SelectSingleNode($"//colour/name[text()='{name}']") == null) { 
+				Trace.WriteLine("Selected name already exists");
+				return; 
+			}
+
 			XmlElement colour = ColourChart.CreateElement("colour");
 
-			XmlElement n = ColourChart.CreateElement(name);
+			XmlElement n = ColourChart.CreateElement("name");
 			XmlElement f = ColourChart.CreateElement("fondant");
 			XmlElement s = ColourChart.CreateElement("sprinkle");
 			XmlElement c = ColourChart.CreateElement("coconut");
@@ -81,36 +107,35 @@ namespace FPBInterop {
 			colour.AppendChild(c);
 
 			ColourChart.DocumentElement.AppendChild(colour);
+			ColourChart.Save(ColourChartXml);
+		}
+		public static void RemoveColour(string name) {
+			if (!ColourChart.HasChildNodes)
+				ColourChart.Load(ColourChartXml);
+			try {
+				XmlNode child = ColourChart.SelectSingleNode($"//colour/name[text()='{name}']").ParentNode;
+				Trace.WriteLine(child.Name);
+				child.ParentNode.RemoveChild(child);
+			}
+			catch (Exception e) {
+				Trace.WriteLine(e.Message);
+				return;
+			}
+			ColourChart.Save(ColourChartXml);
 		}
 
-		public static Dictionary<int,TierColour> Colours = new Dictionary<int, TierColour>();
-		public static void GetColours() {
-			if(!ColourChart.HasChildNodes)
-			ColourChart.Load("./ColourChart.xml");
+		public sealed class Colour {
+			public string Name { get; private set; }
+			public bool Fondant { get; private set; }
+			public bool Sprinkle { get; private set; }
+			public bool Coconut { get; private set; }
 
-			int index = 0;
-			foreach(XmlNode node in ColourChart.DocumentElement) {
-				if (node.Name != "colour" || !node.HasChildNodes)
-					return;
-				string name;
-				bool fondant;
-				bool sprinkle;
-				bool coconut;
-				try {
-					name = node.SelectSingleNode("./name").InnerText;
-					fondant = bool.Parse(node.SelectSingleNode("./fondant").InnerText);
-					sprinkle = bool.Parse(node.SelectSingleNode("./sprinkle").InnerText);
-					coconut = bool.Parse(node.SelectSingleNode("./coconut").InnerText);
-				}
-				catch (Exception e) {
-					Trace.WriteLine($"Could not parse colour xml: {e.Message}");
-					return;
-                }
-
-				TierColour colour = new TierColour(name, fondant, sprinkle, coconut);
-				Colours.Add(index, colour);
-				index++;
-            }
+			public Colour(string name, bool fondant, bool sprinkle, bool coconut) {
+				Name = name;
+				Fondant = fondant;
+				Sprinkle = sprinkle;
+				Coconut = coconut;
+			}
 		}
 	}
 
@@ -125,12 +150,11 @@ namespace FPBInterop {
 		RAINBOWMUD,
 		CARAMELMUD,
 		RASPBERRYROUGH,
-		VANILLABUTTERSPONGE,
+		VANBUTTERSPONGE,
 		CHOCBUTTERSPONGE,
-		VANILLAFRESHSPONGE,
+		VANFRESHSPONGE,
 		CHOCFRESHSPONGE
 	}
-
 	internal enum SideDecoration
 	{
 		NONE,
@@ -139,7 +163,6 @@ namespace FPBInterop {
 		COCONUT,
 		BUTTERCREAM
 	}
-
 	internal enum SideColourEnum
 	{
 		None,

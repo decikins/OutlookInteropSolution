@@ -91,7 +91,9 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ColourChart.xml" />
+    <Content Include="ColourChart.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -4,7 +4,9 @@ using System.Linq;
 using System.IO;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using FPBInterop;
 using static FPBInterop.OutlookHandling;
+
 
 
 namespace FPBInteropConsole {
@@ -33,9 +35,7 @@ namespace FPBInteropConsole {
             }
 
             SetupOutlookRefs();
-
-            FPBInterop.SideColour.AddColour("DarkGrey", false, false, false);
-
+            SideColour.GetColours();
             UserInputLoop();
         }
 
