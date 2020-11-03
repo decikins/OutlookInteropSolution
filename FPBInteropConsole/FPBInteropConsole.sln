@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FPBInteropConsole", "FPBInt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "olinteroplib", "..\olinteroplib\olinteroplib.csproj", "{BD267CF0-B39E-4F42-B854-933D1D1BE283}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FPBInterop", "..\FPBOutlookHandling\FPBInterop.csproj", "{06C118F4-1A81-4C95-B348-957A3CBFBB2B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FPBInterop", "..\FPBInterop\FPBInterop.csproj", "{06C118F4-1A81-4C95-B348-957A3CBFBB2B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

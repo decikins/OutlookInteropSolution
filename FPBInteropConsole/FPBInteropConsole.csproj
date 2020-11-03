@@ -64,7 +64,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CakeOrder.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Franchise.cs" />
@@ -145,7 +144,7 @@
     <Folder Include="Example Orders\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FPBOutlookHandling\FPBInterop.csproj">
+    <ProjectReference Include="..\FPBInterop\FPBInterop.csproj">
       <Project>{06c118f4-1a81-4c95-b348-957a3cbfbb2b}</Project>
       <Name>FPBInterop</Name>
     </ProjectReference>

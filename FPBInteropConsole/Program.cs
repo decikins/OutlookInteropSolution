@@ -33,6 +33,9 @@ namespace FPBInteropConsole {
             }
 
             SetupOutlookRefs();
+
+            FPBInterop.SideColour.AddColour("DarkGrey", false, false, false);
+
             UserInputLoop();
         }
 
