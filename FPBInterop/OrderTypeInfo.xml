@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<xml>
+  <orderTypeInfo>
+    <standard>
+      <type name="Cupcake" cutoffSpan="2" notAvailableDays="Monday"></type>
+      <type name="Design-a-Drip" cutoffSpan="2" notAvailableDays="Monday"></type>
+      <type name="Vanilla Slice" cutoffSpan="2" notAvailableDays="Monday"></type>
+      <type name="Flourless" cutoffSpan="2" notAvailableDays="Monday"></type>
+      <type name="Vegan" cutoffSpan="2" notAvailableDays="Monday"></type>
+      <type name="Cookie" cutoffSpan="7" notAvailableDays="Monday"></type>
+      <type name="General Custom" cutoffSpan="7" notAvailableDays=""></type>
+      <type name="Deluxe Custom" cutoffSpan="14" notAvailableDays=""></type>
+      <type name="Photo" cutoffSpan="2" notAvailableDays=""></type>
+      <type name="General" cutoffSpan="0" notAvailableDays=""></type>
+    </standard>
+    <event>
+      
+    </event>
+  </orderTypeInfo>
+</xml>

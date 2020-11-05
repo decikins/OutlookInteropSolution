@@ -17,7 +17,6 @@ namespace FPBInteropConsole {
         private static string filePath = $"./log.txt {DateTime.Now:dd.MM.yy HH-mm-ss}.txt";
         private static bool TraceToLogFile;
 
-        private static List<Franchise> StoreList = new List<Franchise>();
 
         private static readonly ConsoleTraceListener ConsoleTracer = new ConsoleTraceListener();
         private readonly static TraceSource Tracer = new TraceSource("FPBInterop.Console");
@@ -35,7 +34,6 @@ namespace FPBInteropConsole {
             }
 
             SetupOutlookRefs();
-            SideColour.GetColours();
             UserInputLoop();
         }
 
@@ -153,24 +151,6 @@ namespace FPBInteropConsole {
         private static void ShowHelp() {
             Console.WriteLine("formatdates \"PATH\" OR -f \"PATH\":\n\tFormat dates for Magento orders in the specified\n\tfolder path");
             Console.WriteLine("");
-        }
-        private static void LoadShops(string filename, string path) {
-            string storelist;
-            try {
-                storelist = File.ReadAllText(path + @"\" + filename);
-            }
-            catch (FileNotFoundException) {
-                Tracer.TraceEvent(TraceEventType.Information, 0, "Filename not found at specified filepath!\n");
-                return;
-            }
-
-            StringReader sr = new StringReader(storelist);
-
-            while (sr.Peek() != -1) {
-                string name = sr.ReadLine();
-                Franchise store = new Franchise(name, String.Empty, true);
-                StoreList.Add(store);
-            };
         }
         private static List<string> GetFlags(string input) {
             List<string> flags = new List<string>();

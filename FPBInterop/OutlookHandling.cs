@@ -59,6 +59,7 @@ namespace FPBInterop {
                 _exitHandlerEnabled = true;
             }
         }
+
         private static void CheckUserDefinedProperties() {
 
         }
@@ -221,8 +222,10 @@ namespace FPBInterop {
             if (item.SenderEmailAddress == OrderTypeInfo.MagentoSenderEmail) {
                 Tracer.TraceEvent(TraceEventType.Verbose, 0, item.Subject.Remove(0,27));
                 _ReformatDate(item);
-                bool toBeProcessed = HTMLHandling.Magento.ParseOrder(item.HTMLBody);
-                if (!toBeProcessed) {
+                BaseOrder order = HTMLHandling.Magento.ParseOrder(item.HTMLBody);
+                Trace.WriteLine(order.Location.StoreName);
+                Trace.WriteLine(order.DeliveryDate.ToString());
+                if (order.Meta.HasFlag(OrderMetadata.DoNotProcess)) {
                     item.UnRead = false;
                     UserProperty parsed = item.UserProperties.Add(UserPropertyNames.PARSED, OlUserPropertyType.olText, true);
                     DisableVisiblePrintUserProp(parsed);
@@ -550,7 +553,6 @@ namespace FPBInterop {
 
         }
     }
-
 
     struct UserPropertyNames {
         public const string DATE_FORMATTED = "Date Formatted";

@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<xml>
+  <franchises>
+    <franchise name="Airport West" email="airportwest" daysClosed="" alias=""/>
+    <franchise name="Altona" email="altonagate" daysClosed="" alias=""/>
+    <franchise name="Anakie" email="anakie" daysClosed="" alias="Bell Post"/>
+    <franchise name="Bacchus Marsh" email="bacchusmarsh" daysClosed="" alias=""/>
+    <franchise name="Ballarat" email="ballarat" daysClosed="" alias=""/>
+    <franchise name="Balwyn" email="balwyn" daysClosed="" alias=""/>
+    <franchise name="Bendigo Market" email="bendigomarket" daysClosed="" alias=""/>
+    <franchise name="Berwick" email="berwick" daysClosed="" alias="Eden Rise"/>
+    <franchise name="Brimbank" email="brimbank" daysClosed="" alias=""/>
+    <franchise name="Broadmeadows" email="broadmeadows" daysClosed="" alias=""/>
+    <franchise name="Bundoora" email="bundoora" daysClosed="" alias=""/>
+    <franchise name="Burwood" email="burwood" daysClosed="" alias="Kmart"/>
+    <franchise name="Caroline Springs" email="carolinesprings" daysClosed="" alias=""/>
+    <franchise name="Casey" email="casey" daysClosed="" alias="Casey Central"/>
+    <franchise name="Chadstone" email="chadstone" daysClosed="" alias=""/>
+    <franchise name="Clayton" email="clayton" daysClosed="" alias="Monash"/>
+    <franchise name="Coburg" email="coburg" daysClosed="" alias=""/>
+    <franchise name="Corio" email="corio" daysClosed="" alias=""/>
+    <franchise name="Craigieburn" email="craigieburn" daysClosed="" alias="Craigieburn Plaza"/>
+    <franchise name="Craigieburn Central" email="craigieburncentral" daysClosed="" alias="Central"/>
+    <franchise name="Cranbourne" email="cranbourne" daysClosed="" alias=""/>
+    <franchise name="Croydon" email="croydon" daysClosed="" alias=""/>
+    <franchise name="Dandenong" email="dandenong" daysClosed="" alias=""/>
+    <franchise name="Diamond Creek" email="diamondcreek" daysClosed="" alias=""/>
+    <franchise name="Doreen" email="doreen" daysClosed="" alias=""/>
+    <franchise name="Eastland" email="eastland" daysClosed="" alias=""/>
+    <franchise name="Eltham" email="eltham" daysClosed="" alias=""/>
+    <franchise name="Endeavour Hills" email="endeavour.hills" daysClosed="" alias=""/>
+    <franchise name="Epping" email="epping" daysClosed="" alias=""/>
+    <franchise name="Essendon" email="essendon" daysClosed="" alias=""/>
+    <franchise name="Forest Hill" email="foresthill" daysClosed="" alias=""/>
+    <franchise name="Fountain Gate" email="fountaingate" daysClosed="" alias=""/>
+    <franchise name="Fountain Gate Level 2" email="lv2fgate" daysClosed="" alias="Level 2"/>
+    <franchise name="Geelong" email="geelong" daysClosed="" alias="Geelong West"/>
+    <franchise name="Geelong City" email="geelongwestfield" daysClosed="" alias="Geelong Westfield"/>
+    <franchise name="Gisborne" email="gisborne" daysClosed="" alias=""/>
+    <franchise name="Greensborough" email="greensborough" daysClosed="" alias=""/>
+    <franchise name="Hawthorn" email="hawthorn" daysClosed="" alias=""/>
+    <franchise name="Heidelberg" email="heidelberg" daysClosed="" alias=""/>
+    <franchise name="Highett" email="highett" daysClosed="" alias=""/>
+    <franchise name="Highpoint" email="highpoint" daysClosed="" alias=""/>
+    <franchise name="Hoppers Crossing" email="hopperscrossing" daysClosed="" alias=""/>
+    <franchise name="Keilor Park" email="keilorpark" daysClosed="" alias="Park Drive"/>
+    <franchise name="Keilor Village" email="keilorvillage" daysClosed="" alias="Village"/>
+    <franchise name="Kilmore" email="kilmore" daysClosed="" alias=""/>
+    <franchise name="Knox" email="knox" daysClosed="" alias=""/>
+    <franchise name="Lalor" email="lalor" daysClosed="" alias=""/>
+    <franchise name="Manor Lakes" email="manorlakes" daysClosed="" alias=""/>
+    <franchise name="Mernda Village" email="altonagate" daysClosed="" alias="Mernda"/>
+    <franchise name="Milleara Mall" email="millearamall" daysClosed="" alias="Milleara"/>
+    <franchise name="Moonee Ponds" email="mooneeponds" daysClosed="" alias=""/>
+    <franchise name="Mornington" email="mornington" daysClosed="" alias=""/>
+    <franchise name="Newcomb" email="newcomb" daysClosed="" alias=""/>
+    <franchise name="Niddrie" email="niddrie" daysClosed="" alias=""/>
+    <franchise name="North Melbourne" email="northmelbourne" daysClosed="" alias=""/>
+    <franchise name="Northcote" email="northcote" daysClosed="" alias=""/>
+    <franchise name="Northland" email="northland" daysClosed="" alias=""/>
+    <franchise name="Oakleigh" email="oakleigh" daysClosed="" alias=""/>
+    <franchise name="Officer" email="officer" daysClosed="" alias="Arena"/>
+    <franchise name="Patterson Lakes" email="pattersonlakes" daysClosed="" alias=""/>
+    <franchise name="Plenty Valley" email="plentyvalley" daysClosed="" alias=""/>
+    <franchise name="Point Cook" email="pointcook" daysClosed="" alias=""/>
+    <franchise name="Port Melbourne" email="portmelbourne" daysClosed="" alias=""/>
+    <franchise name="Rosebud" email="rosebud" daysClosed="Sunday" alias=""/>
+    <franchise name="Sanctuary Lakes" email="sanctuarylakes" daysClosed="" alias=""/>
+    <franchise name="Seymour" email="seymour" daysClosed="" alias=""/>
+    <franchise name="Somerville" email="somerville" daysClosed="" alias=""/>
+    <franchise name="Southland" email="southland" daysClosed="" alias=""/>
+    <franchise name="Stud Park" email="studpark" daysClosed="" alias=""/>
+    <franchise name="Sunbury" email="sunbury" daysClosed="" alias=""/>
+    <franchise name="Sunshine" email="sunshine" daysClosed="" alias=""/>
+    <franchise name="Sydenham" email="sydenham" daysClosed="" alias="Watergardens"/>
+    <franchise name="Tarneit" email="tarneit" daysClosed="" alias=""/>
+    <franchise name="The Glen" email="theglen" daysClosed="" alias=""/>
+    <franchise name="The Pines" email="thepines" daysClosed="" alias=""/>
+    <franchise name="Victoria Market" email="victoriamarket" daysClosed="" alias="Vic Market, Queen Victoria Market"/>
+    <franchise name="Wallan" email="wallan" daysClosed="" alias=""/>
+    <franchise name="Waurn Ponds" email="waurnponds" daysClosed="" alias=""/>
+    <franchise name="Waverley Gardens" email="waverleygardens" daysClosed="" alias=""/>
+    <franchise name="Wendouree" email="wendouree" daysClosed="" alias=""/>
+    <franchise name="Werribee" email="werribee" daysClosed="" alias="Werribee (Pacific Werribee)"/>
+    <franchise name="Whittlesea" email="whittlesea" daysClosed="" alias=""/>
+    <franchise name="Woodgrove" email="woodgrove" daysClosed="" alias=""/>
+  </franchises>
+</xml>

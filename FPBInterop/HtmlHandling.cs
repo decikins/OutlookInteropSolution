@@ -1,18 +1,33 @@
-﻿using System;
+﻿using HtmlAgilityPack;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using HtmlAgilityPack;
 
 
 namespace FPBInterop {
-    public class HTMLHandling {
+    [Flags]
+    internal enum OrderMetadata : uint {
+        None = 0,
+        DoNotProcess = 1,
+        FileToDateFolder = 2,
+        DateChanged = 4,
+        DetailsChanged = 8,
+        StoreChanged = 16,
+        Cancelled = 32,
+    }
+
+    internal class HTMLHandling {
         /// PROPERTIES ///
         private static readonly TraceSource Tracer = new TraceSource("FPBInterop.HTMLHandling");
+        private static Dictionary<string, Franchise> Franchises = XmlHandling.LoadFranchises();
+        private static Dictionary<string, Colour> Colours = XmlHandling.LoadColours();
+        private static Dictionary<string, OrderType> Types = XmlHandling.LoadOrderTypes();
 
         /// METHODS ///
-        public static class Wufoo {
+        internal static class Wufoo {
             private static void _WipeHTMLNodes(HtmlNode baseNode) {
                 baseNode.DescendantsAndSelf().ToList()
                     .ForEach(n => {
@@ -36,36 +51,35 @@ namespace FPBInterop {
             }
         }
 
-        public static class Magento {
-            
-
-            public static bool ParseOrder(string HTMLBody) {
+        internal static class Magento {
+            public static BaseOrder ParseOrder(string HTMLBody) {
                 HTMLBody = Regex.Replace(HTMLBody, "\n|\r|\t", "");
                 HtmlDocument HTMLDoc = new HtmlDocument();
                 HTMLDoc.LoadHtml(HTMLBody);
-
                 _WipeHTMLNodes(HTMLDoc);
 
-                return CheckProductTable(HTMLDoc);
-            }
-
-            public static bool CheckProductTable(HtmlDocument HtmlBody) {
-
-                HtmlNode productTable = HtmlBody.DocumentNode.SelectSingleNode(XPathInfo.Magento.productTableXPath);
+                HtmlNode productTable = HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.ProductTable);
                 /*HtmlBody.DocumentNode.Descendants().Where(
                     n => n.NodeType == HtmlNodeType.Text
                     && n.InnerText.Trim(' ') == "Quantity").Single().Ancestors("table").First();*/
 
                 HtmlNodeCollection rows = productTable.SelectNodes(@".//tr");
 
-                StringBuilder traceInfo = new StringBuilder();
+                BaseOrder order;
+                OrderMetadata meta = OrderMetadata.None;
+
+                string deliveryDate =
+                     HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.DeliveryDate).InnerText.Trim(' ');
+                string shop =
+                    HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.Franchise).InnerText.Trim(' ');
+
+                bool processOrder = false;
+                StringBuilder orderTraceInfo = new StringBuilder();
                 for (int i = 1; i < rows.Count - 1; i++) {
                     if (rows[i].ParentNode.Name != "tbody")
                         continue;
-
                     if (rows[i].Descendants("td").Count() < 2)
                         continue;
-
                     HtmlNode toOrderCell = rows[i].SelectSingleNode(".//td[2]");
                     if (toOrderCell == null)
                         continue;
@@ -92,12 +106,7 @@ namespace FPBInterop {
                     if (skuCode.Length > 35)
                         skuCode = $"{skuCode.Substring(0, 35)}...";
 
-                    string deliveryDate =
-                        HtmlBody.DocumentNode.SelectSingleNode(XPathInfo.Magento.deliveryDate).InnerText.Trim(' ');
-                    string shop =
-                        HtmlBody.DocumentNode.SelectSingleNode(XPathInfo.Magento.shop).InnerText.Trim(' ');
-
-                    traceInfo.Append(
+                    orderTraceInfo.Append(
                         $"|\tShop:\t{shop};\n"+
                         $"|\tDelivery Date:\t{deliveryDate};\n"+
                         $"|\t{productName}\n" +
@@ -107,17 +116,27 @@ namespace FPBInterop {
                         $"|\t\tTotal:\t{totalPrice};\n" +
                         $"|\tIgnore product: {ignoreProduct}\n");
 
+
                     if (!ignoreProduct) {
-                        traceInfo.Append("|Must be processed\n");
-                        Tracer.TraceEvent(TraceEventType.Information, 0, traceInfo.ToString());
-                        return true;
+                        processOrder = true;
                     }
                     else
                         continue;
                 }
-                traceInfo.Append("|Processing not necessary, moving to Deleted Items\n");
-                Tracer.TraceEvent(TraceEventType.Information, 0, traceInfo.ToString());
-                return false;
+                if (processOrder) {
+                    orderTraceInfo.Append("|Must be processed\n");
+                }
+                else {
+                    meta |= OrderMetadata.DoNotProcess;
+                    orderTraceInfo.Append("|Processing not necessary, moving to Deleted Items\n");
+                }
+                Tracer.TraceEvent(TraceEventType.Information, 0, orderTraceInfo.ToString());
+                orderTraceInfo.Clear();
+                order = new BaseOrder(
+                    GetFranchiseInfo(shop),
+                    DateTime.Parse(deliveryDate),
+                    meta);
+                return order;
             }
             public static void ReStyleProductTable(HtmlNode productTableNode, bool saveToFile = false) {
                 string tableBGColour = @"background-color:#AA7777";
@@ -152,7 +171,6 @@ namespace FPBInterop {
 
                 return CheckProductTableSpecial(HTMLDoc);
             }
-
             public static bool CheckProductTableSpecial(HtmlDocument HtmlBody) {
                 HtmlNode productTable = //HtmlBody.DocumentNode.SelectSingleNode(productTableXPath);
                 HtmlBody.DocumentNode.Descendants().Where(
@@ -211,17 +229,30 @@ namespace FPBInterop {
                 return false;
             }
         }
+
+        public static Franchise GetFranchiseInfo(string nameOrAlias) {
+            if (Franchises.ContainsKey(nameOrAlias))
+                return Franchises[nameOrAlias];
+            else {
+                foreach (Franchise f in Franchises.Values) {
+                    foreach(string alias in f.Aliases)
+                    if (alias == nameOrAlias)
+                        return f;
+                }
+            }
+            return null;
+        }
     }
 
     internal static class XPathInfo {
         internal static class Magento {
-            internal static string productTableXPath =
-                    "//div/table/tbody/tr/td/table/tbody/tr[7]/td/span/table";
-            internal static string deliveryInfoXpath =
+            internal const string ProductTable =
+                "//div/table/tbody/tr/td/table/tbody/tr[7]/td/span/table";
+            internal const string DeliveryTable =
                 "//div/table/tbody/tr/td/table/tbody/tr[6]/td/table/tbody/tr";
-            internal static string deliveryDate =
+            internal const string DeliveryDate =
                 "//div/table/tbody/tr/td/table/tbody/tr[6]/td/table/tbody/tr/td[2]/strong";
-            internal static string shop =
+            internal const string Franchise =
                 "//div/table/tbody/tr/td/table/tbody/tr[6]/td/table/tbody/tr/td[1]/strong[1]";
         }
     }
