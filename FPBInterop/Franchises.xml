@@ -7,7 +7,7 @@
     <franchise name="Bacchus Marsh" email="bacchusmarsh" daysClosed="" alias=""/>
     <franchise name="Ballarat" email="ballarat" daysClosed="" alias=""/>
     <franchise name="Balwyn" email="balwyn" daysClosed="" alias=""/>
-    <franchise name="Bendigo Market" email="bendigomarket" daysClosed="" alias=""/>
+    <franchise name="Bendigo Market" email="bendigomarket" daysClosed="" alias="Bendigo Marketplace"/>
     <franchise name="Berwick" email="berwick" daysClosed="" alias="Eden Rise"/>
     <franchise name="Brimbank" email="brimbank" daysClosed="" alias=""/>
     <franchise name="Broadmeadows" email="broadmeadows" daysClosed="" alias=""/>
@@ -32,9 +32,9 @@
     <franchise name="Epping" email="epping" daysClosed="" alias=""/>
     <franchise name="Essendon" email="essendon" daysClosed="" alias=""/>
     <franchise name="Forest Hill" email="foresthill" daysClosed="" alias=""/>
-    <franchise name="Fountain Gate" email="fountaingate" daysClosed="" alias=""/>
-    <franchise name="Fountain Gate Level 2" email="lv2fgate" daysClosed="" alias="Level 2"/>
-    <franchise name="Geelong" email="geelong" daysClosed="" alias="Geelong West"/>
+    <franchise name="Fountain Gate" email="fountaingate" daysClosed="" alias="Fountain Gate Level 1 (Near Woolworths)"/>
+    <franchise name="Fountain Gate Level 2" email="lv2fgate" daysClosed="" alias="Level 2, Level 2 - Fountain Gate (Near Coles)"/>
+    <franchise name="Geelong" email="geelong" daysClosed="" alias="Geelong West, Geelong (Pakington Street)"/>
     <franchise name="Geelong City" email="geelongwestfield" daysClosed="" alias="Geelong Westfield"/>
     <franchise name="Gisborne" email="gisborne" daysClosed="" alias=""/>
     <franchise name="Greensborough" email="greensborough" daysClosed="" alias=""/>

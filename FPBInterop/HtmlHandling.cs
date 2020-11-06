@@ -68,13 +68,16 @@ namespace FPBInterop {
                 BaseOrder order;
                 OrderMetadata meta = OrderMetadata.None;
 
-                string deliveryDate =
-                     HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.DeliveryDate).InnerText.Trim(' ');
                 string shop =
                     HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.Franchise).InnerText.Trim(' ');
-
+                string deliveryDate =
+                     HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.DeliveryDate).InnerText.Trim(' ');
+                
                 bool processOrder = false;
                 StringBuilder orderTraceInfo = new StringBuilder();
+                orderTraceInfo.Append(
+                    $"|\tShop:\t{shop};\n" +
+                    $"|\tDelivery Date:\t{deliveryDate};\n");
                 for (int i = 1; i < rows.Count - 1; i++) {
                     if (rows[i].ParentNode.Name != "tbody")
                         continue;
@@ -107,8 +110,6 @@ namespace FPBInterop {
                         skuCode = $"{skuCode.Substring(0, 35)}...";
 
                     orderTraceInfo.Append(
-                        $"|\tShop:\t{shop};\n"+
-                        $"|\tDelivery Date:\t{deliveryDate};\n"+
                         $"|\t{productName}\n" +
                         $"|\t\t{skuCode};\n" +
                         $"|\t\tPrice:\t{singlePrice};\n" +
@@ -235,12 +236,14 @@ namespace FPBInterop {
                 return Franchises[nameOrAlias];
             else {
                 foreach (Franchise f in Franchises.Values) {
-                    foreach(string alias in f.Aliases)
-                    if (alias == nameOrAlias)
-                        return f;
+                    foreach (string alias in f.Aliases) {
+                        Tracer.TraceEvent(TraceEventType.Verbose, 0, alias);
+                        if (alias == nameOrAlias)
+                            return f; 
+                    }
                 }
             }
-            return null;
+            throw new ArgumentException($"Store name {nameOrAlias} not found");
         }
     }
 

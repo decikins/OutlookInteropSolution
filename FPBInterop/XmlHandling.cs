@@ -109,6 +109,7 @@ namespace FPBInterop {
 				string name;
 				string email;
 				List<string> alias = new List<string>();
+
 				string aliasString = node.Attributes.GetNamedItem("alias").Value;
 				name = node.Attributes.GetNamedItem("name").Value;
 				email = node.Attributes.GetNamedItem("email").Value;
@@ -116,7 +117,7 @@ namespace FPBInterop {
 					if (aliasString.Contains(",")) {
 						string[] aliases = aliasString.Split(',');
 						foreach (string a in aliases) {
-							alias.Add(a);
+							alias.Add(a.Trim(' '));
 						}
 					} else {
 						alias.Add(aliasString);
@@ -131,6 +132,7 @@ namespace FPBInterop {
 
 		public static Dictionary<string,OrderType> LoadOrderTypes() {
 			xml.Load(OrderTypeXmlPath);
+
 			Dictionary<string, OrderType> types = new Dictionary<string, OrderType>();
 			XmlNode stdTypeXml = xml.SelectSingleNode("//standard");
 			foreach (XmlNode node in stdTypeXml) {
@@ -148,7 +150,7 @@ namespace FPBInterop {
 					if (daysString.Contains(",")) {
 						string[] days = daysString.Split(',');
 						foreach (string day in days) {
-							daysNotAvailable |= (DayOfWeekFlag)Enum.Parse(typeof(DayOfWeekFlag), day);
+							daysNotAvailable |= (DayOfWeekFlag)Enum.Parse(typeof(DayOfWeekFlag), day.Trim(' '));
 						}
                     }
                     else {

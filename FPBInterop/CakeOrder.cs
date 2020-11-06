@@ -10,12 +10,12 @@ namespace FPBInterop {
 
 	internal class BaseOrder {
 		public Franchise Location { get; private set; }
-		public DateTime DeliveryDate { get { return DeliveryDate.Date(); } private set { DeliveryDate = value; } }
+		public DateTime DeliveryDate { get; private set; }
 		public OrderMetadata Meta { get; private set; }
 
 		public BaseOrder(Franchise location, DateTime deliveryDate, OrderMetadata meta) {
 			Location = location;
-			DeliveryDate = deliveryDate.Date;
+			DeliveryDate = deliveryDate;
 			Meta = meta;
 		}
 	}
@@ -58,13 +58,6 @@ namespace FPBInterop {
 			SideType = sideTypes;
 		}
 	}
-
-	public static class DateExtension {
-		public static DateTime Date(this DateTime date) {
-			return date.Date;
-        }
-    }
-
 	public enum CakeFlavour
 	{
 		NONE,
