@@ -10,6 +10,7 @@ namespace FPBInterop {
 		private const string ColourXmlPath = "./ColourChart.xml";
 		private const string FranchiseeXmlPath = "./Franchises.xml";
 		private const string OrderTypeXmlPath = "./OrderTypeInfo.xml";
+		private const string SKUTypeTable = "./SKUTypeTable.xml";
 
 		private static XmlDocument xml = new XmlDocument();
 
@@ -48,7 +49,7 @@ namespace FPBInterop {
 
 				colours.Add(name, new Colour(name, sides));
 			}
-			xml = new XmlDocument();
+			xml = null;
 			Tracer.TraceEvent(TraceEventType.Information, 0,
 				$"Loading ColourChart.xml complete");
 			return colours;
@@ -82,7 +83,6 @@ namespace FPBInterop {
 			xml.DocumentElement.AppendChild(colour);
 			xml.Save(ColourXmlPath);
 		}
-
 		public static void RemoveColour(string name) {
 			if (!xml.HasChildNodes)
 				xml.Load(ColourXmlPath);
@@ -126,15 +126,15 @@ namespace FPBInterop {
                 
 				franchises.Add(name, new Franchise(name, email, alias));
 			}
-			xml = new XmlDocument();
+			xml = null;
 			return franchises;
 		}
 
-		public static Dictionary<string,OrderType> LoadOrderTypes() {
+		public static Dictionary<string,OrderType> LoadOrderTypes(string orderTypeTag) {
 			xml.Load(OrderTypeXmlPath);
 
 			Dictionary<string, OrderType> types = new Dictionary<string, OrderType>();
-			XmlNode stdTypeXml = xml.SelectSingleNode("//standard");
+			XmlNode stdTypeXml = xml.SelectSingleNode(orderTypeTag);
 			foreach (XmlNode node in stdTypeXml) {
 				if (node.Name != "type" || node.Attributes.Count == 0)
 					continue;
@@ -157,10 +157,13 @@ namespace FPBInterop {
 						daysNotAvailable = (DayOfWeekFlag)Enum.Parse(typeof(DayOfWeekFlag), daysString);
 					}
 				}
-
-				types.Add(name, new OrderType(name, cutoffSpan, daysNotAvailable));
+					
+				int filingPriority = int.Parse(node.Attributes.GetNamedItem("filingPriority").Value);
+				XmlNode skuTagAttr = node.Attributes.GetNamedItem("skuTag");
+				string skuTag = (skuTagAttr == null) ? skuTagAttr.Value : null;
+				types.Add(name, new OrderType(name, cutoffSpan, daysNotAvailable, (FilingPriority)filingPriority, skuTag));
 			}
-			xml = new XmlDocument();
+			xml = null;
 			return types;
 		}
 	}
@@ -188,18 +191,26 @@ namespace FPBInterop {
 			Aliases = alias;
 		}
 	}
+
 	internal sealed class OrderType {
 		public string Type { get; private set; }
 		public TimeSpan CutoffPeriod { get; private set; }
 		public DayOfWeekFlag DaysNotAvailable { get; private set; }
-		public OrderType(string type, TimeSpan cutoff, DayOfWeekFlag daysUnavailable) {
+		public FilingPriority Priority { get; private set; }
+		public string SkuTag { get; private set; }
+		public OrderType(string type, 
+						TimeSpan cutoff, 
+						DayOfWeekFlag daysUnavailable, 
+						FilingPriority priority,
+						string skuTag = null) {
 			Type = type;
 			CutoffPeriod = cutoff;
 			DaysNotAvailable = daysUnavailable;
+			Priority = priority;
+			SkuTag = skuTag;
         }
     }
-
-	internal static class OrderTypes {
+	internal static class OrderTypeXmlTags {
 		public static string Standard { get { return "//standard"; } }
 		public static string Event { get { return "//event"; } }
     }

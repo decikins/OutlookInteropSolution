@@ -24,7 +24,8 @@ namespace FPBInterop {
         private static readonly TraceSource Tracer = new TraceSource("FPBInterop.HTMLHandling");
         private static Dictionary<string, Franchise> Franchises = XmlHandling.LoadFranchises();
         private static Dictionary<string, Colour> Colours = XmlHandling.LoadColours();
-        private static Dictionary<string, OrderType> Types = XmlHandling.LoadOrderTypes();
+        private static Dictionary<string, OrderType> OrderTypesStandard =
+            XmlHandling.LoadOrderTypes(OrderTypeXmlTags.Standard);
 
         /// METHODS ///
         internal static class Wufoo {
@@ -65,19 +66,20 @@ namespace FPBInterop {
 
                 HtmlNodeCollection rows = productTable.SelectNodes(@".//tr");
 
-                BaseOrder order;
+                MagentoOrder order;
                 OrderMetadata meta = OrderMetadata.None;
 
                 string shop =
                     HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.Franchise).InnerText.Trim(' ');
                 string deliveryDate =
                      HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.DeliveryDate).InnerText.Trim(' ');
-                
+
                 bool processOrder = false;
                 StringBuilder orderTraceInfo = new StringBuilder();
                 orderTraceInfo.Append(
                     $"|\tShop:\t{shop};\n" +
                     $"|\tDelivery Date:\t{deliveryDate};\n");
+
                 for (int i = 1; i < rows.Count - 1; i++) {
                     if (rows[i].ParentNode.Name != "tbody")
                         continue;
@@ -107,7 +109,11 @@ namespace FPBInterop {
                     }
 
                     if (skuCode.Length > 35)
-                        skuCode = $"{skuCode.Substring(0, 35)}...";
+                        skuCode = $"PHOTOCAKE";
+
+                    foreach(OrderType t in OrderTypesStandard.Values) {
+
+                    }
 
                     orderTraceInfo.Append(
                         $"|\t{productName}\n" +
@@ -133,7 +139,7 @@ namespace FPBInterop {
                 }
                 Tracer.TraceEvent(TraceEventType.Information, 0, orderTraceInfo.ToString());
                 orderTraceInfo.Clear();
-                order = new BaseOrder(
+                order = new MagentoOrder(
                     GetFranchiseInfo(shop),
                     DateTime.Parse(deliveryDate),
                     meta);
@@ -229,6 +235,7 @@ namespace FPBInterop {
                     Trace.WriteLine(" safe");
                 return false;
             }
+
         }
 
         public static Franchise GetFranchiseInfo(string nameOrAlias) {
@@ -239,7 +246,7 @@ namespace FPBInterop {
                     foreach (string alias in f.Aliases) {
                         Tracer.TraceEvent(TraceEventType.Verbose, 0, alias);
                         if (alias == nameOrAlias)
-                            return f; 
+                            return f;
                     }
                 }
             }

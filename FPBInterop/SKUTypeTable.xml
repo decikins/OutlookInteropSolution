@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<xml>
+  <type value="Cupcake">
+    <SKU value="DECCUP1"/>
+    <SKU value="DECCUP2"/>
+    <SKU value="DECCUP3"/>
+    <SKU value="DECCUP4"/>
+    <SKU value="DECCUP5"/>
+    <SKU value="DECCUP6"/>
+    <SKU value="DECCUP7"/>
+    <SKU value="DECCUP8"/>
+  </type>
+  <type value="Design-a-Drip">
+    <SKU value="DESIGNADRIP"/>
+  </type>
+  <type value="Vanilla Slice">
+    <SKU value="DECVAN1"/>
+    <SKU value="DECVAN2"/>
+    <SKU value="DECVAN3"/>
+    <SKU value="DECVAN4"/>
+  </type>
+  <type value="Flourless">
+    <SKU value="DECFLO1"/>
+    <SKU value="DECFLO2"/>
+    <SKU value="DECFLO3"/>
+    <SKU value="DECFLO4"/>
+    <SKU value="DECFLO5"/>
+    <SKU value="DECFLO6"/>
+  </type>
+  <type value="Vegan">
+    <SKU value="DECVEG1"/>
+    <SKU value="DECVEG2"/>
+    <SKU value="DECVEG3"/>
+    <SKU value="DECVEG4"/>
+    <SKU value="DECVEG5"/>
+    <SKU value="DECVEG6"/>
+  </type>
+  <type value="Cookie">
+    <SKU value="DECCOOK1"/>
+  </type>
+</xml>

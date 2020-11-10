@@ -223,8 +223,6 @@ namespace FPBInterop {
                 Tracer.TraceEvent(TraceEventType.Verbose, 0, item.Subject.Remove(0,27));
                 _ReformatDate(item);
                 BaseOrder order = HTMLHandling.Magento.ParseOrder(item.HTMLBody);
-                Trace.WriteLine(order.Location.StoreName);
-                Trace.WriteLine(order.DeliveryDate.ToString());
                 if (order.Meta.HasFlag(OrderMetadata.DoNotProcess)) {
                     item.UnRead = false;
                     UserProperty parsed = item.UserProperties.Add(UserPropertyNames.PARSED, OlUserPropertyType.olText, true);

@@ -8,6 +8,19 @@ using System.Diagnostics;
 
 namespace FPBInterop {
 
+	internal class Product {
+		public string Name { get; private set; }
+		public string SKU { get; private set; }
+		public OrderType ProductType { get; private set; }
+		public int Price { get; private set; }
+		public Product(string name, string skuCode, OrderType type, int price) {
+			Name = name;
+			SKU = skuCode;
+			ProductType = type;
+			Price = price;
+		}
+	}
+
 	internal class BaseOrder {
 		public Franchise Location { get; private set; }
 		public DateTime DeliveryDate { get; private set; }
@@ -17,6 +30,30 @@ namespace FPBInterop {
 			Location = location;
 			DeliveryDate = deliveryDate;
 			Meta = meta;
+		}
+	}
+
+	[Flags]
+	internal enum FilingPriority : byte {
+		NONE = 0,
+		GENERAL = 1,
+		COOKIE = 2,
+		CUSTOM = 4
+    }
+
+	internal class MagentoOrder : BaseOrder { 
+		public List<Product> Products { get; private set; }
+		public FilingPriority OrderPriority { get; private set; }
+		public MagentoOrder(Franchise location, 
+							DateTime deliveryDate, 
+							OrderMetadata meta,
+							List<Product> products) 
+			: base(location,deliveryDate,meta) {
+			Products = products;
+			OrderPriority = FilingPriority.NONE;
+			foreach (Product p in products) {
+				OrderPriority |= p.ProductType.Priority;
+            }
 		}
 	}
 
@@ -58,6 +95,7 @@ namespace FPBInterop {
 			SideType = sideTypes;
 		}
 	}
+
 	public enum CakeFlavour
 	{
 		NONE,
