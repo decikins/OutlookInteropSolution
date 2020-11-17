@@ -2,25 +2,58 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Xml;
+using System.Xml.Serialization;
 
 namespace FPBInterop {
-    internal class XmlHandling {
+    internal static class XmlHandler {
 		private static readonly TraceSource Tracer = new TraceSource("FPBInterop.XmlHandling");
 
-		private const string ColourXmlPath = "./ColourChart.xml";
-		private const string FranchiseeXmlPath = "./Franchises.xml";
-		private const string OrderTypeXmlPath = "./OrderTypeInfo.xml";
-		private const string SKUTypeTable = "./SKUTypeTable.xml";
+		internal static Dictionary<string, Franchise> Franchises;
+		internal static Dictionary<string, Colour> Colours;
+		internal static Dictionary<string, ProductType> ProductTypesStandard;
+
+		private const string ConfigXmlPath = "./Config.xml";
 
 		private static XmlDocument xml = new XmlDocument();
 
-		public static Dictionary<string,Colour> LoadColours() {
-			Tracer.TraceEvent(TraceEventType.Information, 0, $"Begin loading ColourChart.xml from {ColourXmlPath}");
-			if(!xml.HasChildNodes)
-				xml.Load(ColourXmlPath);
+		internal static void LoadConfig() {
+			xml.Load(ConfigXmlPath);
+
+			if (xml.SelectSingleNode("//sideColours") == null)
+				throw new XmlException(
+					$"Config.xml does not contain 'sideColours' node, no colour info loaded");
+			else
+				Colours = LoadColours();
+
+			if (xml.SelectSingleNode("//franchises") == null)
+				throw new XmlException(
+					$"Config.xml does not contain 'franchises' node, no franchise info loaded");
+			else
+				Franchises = LoadFranchises();
+
+			if (xml.SelectSingleNode("//flavours") == null)
+				throw new XmlException(
+					$"Config.xml does not contain 'flavours' node, no flavour info loaded");
+			else;
+				//hasFlavourInfo = true;
+
+			if (xml.SelectSingleNode("//productTypeInfo") == null)
+				throw new XmlException(
+					$"Config.xml does not contain 'productTypeInfo' node, no product type info loaded");
+			else
+				ProductTypesStandard = LoadStandardProductTypes();
+		}
+
+		internal static Dictionary<string,Colour> LoadColours() {
+			Tracer.TraceEvent(TraceEventType.Information, 0, $"Begin loading colour table");
 
 			Dictionary<string, Colour> colours = new Dictionary<string, Colour>();
 			XmlNode sideColours = xml.SelectSingleNode("//sideColours");
+
+			if (sideColours == null) 
+				throw new XmlException(
+					$"Config.xml does not contain 'sideColours' node, no colour info loaded");
+			
 
 			Tracer.TraceEvent(TraceEventType.Verbose, 0, 
 				$"ColourChart.xml contains {sideColours.ChildNodes.Count} entries");
@@ -49,57 +82,11 @@ namespace FPBInterop {
 
 				colours.Add(name, new Colour(name, sides));
 			}
-			xml = null;
 			Tracer.TraceEvent(TraceEventType.Information, 0,
 				$"Loading ColourChart.xml complete");
 			return colours;
 		}
-		public static void AddColour(string name, bool fondant, bool sprinkle, bool coconut) {
-			if (!xml.HasChildNodes)
-				xml.Load(ColourXmlPath);
-
-			if (xml.SelectSingleNode($"//colour/name[text()='{name}']") == null) {
-				Tracer.TraceEvent(TraceEventType.Information,0,"Selected name already exists");
-				return;
-			}
-
-			XmlElement colour = xml.CreateElement("colour");
-
-			XmlElement n = xml.CreateElement("name");
-			XmlElement f = xml.CreateElement("fondant");
-			XmlElement s = xml.CreateElement("sprinkle");
-			XmlElement c = xml.CreateElement("coconut");
-
-			n.InnerText = name;
-			f.InnerText = fondant.ToString().ToUpper();
-			s.InnerText = sprinkle.ToString().ToUpper();
-			c.InnerText = coconut.ToString().ToUpper();
-
-			colour.AppendChild(n);
-			colour.AppendChild(f);
-			colour.AppendChild(s);
-			colour.AppendChild(c);
-
-			xml.DocumentElement.AppendChild(colour);
-			xml.Save(ColourXmlPath);
-		}
-		public static void RemoveColour(string name) {
-			if (!xml.HasChildNodes)
-				xml.Load(ColourXmlPath);
-			try {
-				XmlNode child = xml.SelectSingleNode($"//colour/name[text()='{name}']").ParentNode;
-				child.ParentNode.RemoveChild(child);
-			}
-			catch (Exception e) {
-				Tracer.TraceEvent(TraceEventType.Error,0,e.Message);
-				return;
-			}
-			xml.Save(ColourXmlPath);
-		}
-
-		public static Dictionary<string,Franchise> LoadFranchises() {
-			xml.Load(FranchiseeXmlPath);
-
+		internal static Dictionary<string,Franchise> LoadFranchises() {
 			Dictionary<string, Franchise> franchises = new Dictionary<string, Franchise>();
 			XmlNode franchiseXml = xml.SelectSingleNode("//franchises");
 			foreach (XmlNode node in franchiseXml) {
@@ -126,15 +113,13 @@ namespace FPBInterop {
                 
 				franchises.Add(name, new Franchise(name, email, alias));
 			}
-			xml = null;
 			return franchises;
 		}
+		internal static Dictionary<string,ProductType> LoadStandardProductTypes() {
+			xml.Load(ConfigXmlPath);
 
-		public static Dictionary<string,OrderType> LoadOrderTypes(string orderTypeTag) {
-			xml.Load(OrderTypeXmlPath);
-
-			Dictionary<string, OrderType> types = new Dictionary<string, OrderType>();
-			XmlNode stdTypeXml = xml.SelectSingleNode(orderTypeTag);
+			Dictionary<string, ProductType> types = new Dictionary<string, ProductType>();
+			XmlNode stdTypeXml = xml.SelectSingleNode("//productTypeInfo/standard");
 			foreach (XmlNode node in stdTypeXml) {
 				if (node.Name != "type" || node.Attributes.Count == 0)
 					continue;
@@ -160,11 +145,60 @@ namespace FPBInterop {
 					
 				int filingPriority = int.Parse(node.Attributes.GetNamedItem("filingPriority").Value);
 				XmlNode skuTagAttr = node.Attributes.GetNamedItem("skuTag");
-				string skuTag = (skuTagAttr == null) ? skuTagAttr.Value : null;
-				types.Add(name, new OrderType(name, cutoffSpan, daysNotAvailable, (FilingPriority)filingPriority, skuTag));
+				types.Add(skuTagAttr.Value, new ProductType(name, cutoffSpan, daysNotAvailable, (FilingPriority)filingPriority, skuTagAttr.Value));
 			}
 			xml = null;
 			return types;
+		}
+
+		internal static void AddColour(string name, bool fondant, bool sprinkle, bool coconut) {
+			if (xml.SelectSingleNode($"//colour/name[text()='{name}']") != null) {
+				Tracer.TraceEvent(TraceEventType.Information, 0, "Selected name already exists");
+				return;
+			}
+
+			XmlElement colour = xml.CreateElement("colour");
+
+			XmlElement n = xml.CreateElement("name");
+			XmlElement f = xml.CreateElement("fondant");
+			XmlElement s = xml.CreateElement("sprinkle");
+			XmlElement c = xml.CreateElement("coconut");
+
+			n.InnerText = name;
+			f.InnerText = fondant.ToString().ToLower();
+			s.InnerText = sprinkle.ToString().ToLower();
+			c.InnerText = coconut.ToString().ToLower();
+
+			colour.AppendChild(n);
+			colour.AppendChild(f);
+			colour.AppendChild(s);
+			colour.AppendChild(c);
+
+			xml.DocumentElement.SelectSingleNode("//sideColours").AppendChild(colour);
+			xml.Save(ConfigXmlPath);
+		}
+		internal static void RemoveColour(string name) {
+			try {
+				XmlNode colour = xml.SelectSingleNode($"//colour/name[text()='{name}']").ParentNode;
+				if (colour == null) {
+					Tracer.TraceEvent(TraceEventType.Information, 0, $"No colour info exists with name {name}");
+					return;
+				}
+				colour.ParentNode.RemoveChild(colour);
+			}
+			catch (Exception e) {
+				Tracer.TraceEvent(TraceEventType.Error, 0, e.Message);
+				return;
+			}
+			xml.Save(ConfigXmlPath);
+		}
+
+		internal static ProductType GetProductType(string sku) {
+			foreach(KeyValuePair<string,ProductType> entry in ProductTypesStandard) {
+				if (sku.StartsWith(entry.Key));
+					return entry.Value;
+            }
+			throw new Exception($"No Product type found that matches SKU {sku}");
 		}
 	}
 
@@ -192,13 +226,13 @@ namespace FPBInterop {
 		}
 	}
 
-	internal sealed class OrderType {
+	internal sealed class ProductType {
 		public string Type { get; private set; }
 		public TimeSpan CutoffPeriod { get; private set; }
 		public DayOfWeekFlag DaysNotAvailable { get; private set; }
 		public FilingPriority Priority { get; private set; }
 		public string SkuTag { get; private set; }
-		public OrderType(string type, 
+		public ProductType(string type, 
 						TimeSpan cutoff, 
 						DayOfWeekFlag daysUnavailable, 
 						FilingPriority priority,
@@ -209,9 +243,5 @@ namespace FPBInterop {
 			Priority = priority;
 			SkuTag = skuTag;
         }
-    }
-	internal static class OrderTypeXmlTags {
-		public static string Standard { get { return "//standard"; } }
-		public static string Event { get { return "//event"; } }
     }
 }

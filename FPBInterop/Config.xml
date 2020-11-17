@@ -1,5 +1,89 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <xml>
+  <sideColours>
+    <colour name="None"           fondant="false" sprinkle="false"  coconut="false"/>
+    <colour name="Red"            fondant="true"  sprinkle="true"   coconut="false"/>
+    <colour name="Hot Pink"       fondant="true"  sprinkle="true"   coconut="false"/>
+    <colour name="Pale Pink"      fondant="true"  sprinkle="true"   coconut="true"/>
+    <colour name="Purple"         fondant="true"  sprinkle="false"  coconut="false"/>
+    <colour name="Pale Purple"    fondant="true"  sprinkle="true"   coconut="true"/>
+    <colour name="Navy Blue"      fondant="true"  sprinkle="false"  coconut="false"/>
+    <colour name="Royal Blue"     fondant="true"  sprinkle="true"   coconut="false"/>
+    <colour name="Satin Blue"     fondant="true"  sprinkle="false"  coconut="false"/>
+    <colour name="Pale Blue"      fondant="true"  sprinkle="true"   coconut="true"/>
+    <colour name="Aqua Blue"      fondant="true"  sprinkle="false"  coconut="false"/>
+    <colour name="Emerald Green"  fondant="true"  sprinkle="false"  coconut="false"/>
+    <colour name="Grass Green"    fondant="false" sprinkle="true"   coconut="false"/>
+    <colour name="Pale Green"     fondant="true"  sprinkle="false"  coconut="true"/>
+    <colour name="Kelly Green"    fondant="true"  sprinkle="false"  coconut="false"/>
+    <colour name="Yellow"         fondant="true"  sprinkle="true"   coconut="false"/>
+    <colour name="Pale Yellow"    fondant="true"  sprinkle="false"  coconut="true"/>
+    <colour name="Orange"         fondant="true"  sprinkle="true"   coconut="false"/>
+    <colour name="Pale Orange"    fondant="false" sprinkle="false"  coconut="true"/>
+    <colour name="Chocolate"      fondant="true"  sprinkle="true"   coconut="false"/>
+    <colour name="Black"          fondant="true"  sprinkle="true"   coconut="false"/>
+    <colour name="Grey"           fondant="true"  sprinkle="false"  coconut="false"/>
+    <colour name="White"          fondant="true"  sprinkle="false"  coconut="true"/>
+    <colour name="Marbled"        fondant="true"  sprinkle="false"  coconut="false"/>
+  </sideColours>
+  <flavours>
+    <flavour name="None"            canBeIced="false" canMultipleTier="false" canSupportMud="false"/>
+    <flavour name="Angel Mud"       canBeIced="true"  canMultipleTier="true"  canSupportMud="true"/>
+    <flavour name="Chocolate Mud"   canBeIced="true"  canMultipleTier="true"  canSupportMud="true"/>
+    <flavour name="Marble Mud"      canBeIced="true"  canMultipleTier="true"  canSupportMud="true"/>
+    <flavour name="Orange Mud"      canBeIced="true"  canMultipleTier="true"  canSupportMud="true"/>
+    <flavour name="Red Velvet"      canBeIced="true"  canMultipleTier="true"  canSupportMud="true"/>
+    <flavour name="Rainbow Mud"     canBeIced="true"  canMultipleTier="true"  canSupportMud="true"/>
+    <flavour name="Caramel Mud"     canBeIced="true"  canMultipleTier="true"  canSupportMud="true"/>
+    <flavour name="Raspberry Rough" canBeIced="true"  canMultipleTier="true"  canSupportMud="true"/>
+    <flavour name="Vanilla Buttercream Sponge"    canBeIced="true"  canMultipleTier="true"  canSupportMud="false"/>
+    <flavour name="Chocolate Buttercream Sponge"  canBeIced="true"  canMultipleTier="true"  canSupportMud="false"/>
+    <flavour name="Vanilla Fresh Cream Sponge"    canBeIced="false" canMultipleTier="true"  canSupportMud="false"/>
+    <flavour name="Chocolate Fresh Cream Sponge"  canBeIced="false" canMultipleTier="true"  canSupportMud="false"/>
+  </flavours>
+  <sideDecoration>
+    <side name="None"/>
+    <side name="Fully Iced"/>
+    <side name="Sprinkles"/>
+    <side name="Coconut"/>
+    <side name="Buttercream"/>
+    <side name="Naked"/>
+  </sideDecoration>
+  <productTypeInfo>
+    <standard>
+      <type name="Cupcake" cutoffSpan="2" notAvailableDays="Monday" filingPriority="0"
+            skuTag="DECCUP"/>
+      <type name="Design-a-Drip" cutoffSpan="2" notAvailableDays="Monday" filingPriority="0"
+            skuTag="DESIGNADRIP"/>
+      <type name="Vanilla Slice" cutoffSpan="2" notAvailableDays="Monday" filingPriority="0"
+            skuTag="DECVAN"/>
+      <type name="Flourless"      cutoffSpan="2"  notAvailableDays="Monday" filingPriority="0"
+            skuTag="DECFLO"/>
+      <type name="Vegan"          cutoffSpan="2"  notAvailableDays="Monday" filingPriority="0"
+            skuTag="DECVEG"/>
+      <type name="Cookie"         cutoffSpan="7"  notAvailableDays="Monday" filingPriority="1"
+            skuTag="DECCOOK"/>
+      <type name="General Custom" cutoffSpan="7"  notAvailableDays=""       filingPriority="2"
+            skuTag="GRECUST"/>
+      <type name="Deluxe Custom"  cutoffSpan="14" notAvailableDays=""       filingPriority="2"
+            skuTag="BLUCUST"/>
+      <type name="Wedding Custom" cutoffSpan="21" notAvailableDays=""       filingPriority="2"
+            skuTag="DECWED"/>
+      <type name="Photo"          cutoffSpan="2"  notAvailableDays=""       filingPriority="0"
+            skuTag="PHOTOCAKE"/>
+      <type name="General"        cutoffSpan="0"  notAvailableDays=""       filingPriority="0"
+            skuTag="DECGEN"/>
+      <type name="Children"        cutoffSpan="0"  notAvailableDays=""       filingPriority="0"
+            skuTag="DECKID"/>
+      <type name="Sports"        cutoffSpan="0"  notAvailableDays=""       filingPriority="0"
+            skuTag="DECSPO"/>
+      <type name="Religious"        cutoffSpan="0"  notAvailableDays=""       filingPriority="0"
+           skuTag="DECREL"/>
+    </standard>
+    <event>
+
+    </event>
+  </productTypeInfo>
   <franchises>
     <franchise name="Airport West" email="airportwest" daysClosed="" alias=""/>
     <franchise name="Altona" email="altonagate" daysClosed="" alias=""/>
@@ -35,7 +119,7 @@
     <franchise name="Fountain Gate" email="fountaingate" daysClosed="" alias="Fountain Gate Level 1 (Near Woolworths)"/>
     <franchise name="Fountain Gate Level 2" email="lv2fgate" daysClosed="" alias="Level 2, Level 2 - Fountain Gate (Near Coles)"/>
     <franchise name="Geelong" email="geelong" daysClosed="" alias="Geelong West, Geelong (Pakington Street)"/>
-    <franchise name="Geelong City" email="geelongwestfield" daysClosed="" alias="Geelong Westfield"/>
+    <franchise name="Geelong City (Westfield)" email="geelongwestfield" daysClosed="" alias="Geelong Westfield, Geelong City"/>
     <franchise name="Gisborne" email="gisborne" daysClosed="" alias=""/>
     <franchise name="Greensborough" email="greensborough" daysClosed="" alias=""/>
     <franchise name="Hawthorn" email="hawthorn" daysClosed="" alias=""/>

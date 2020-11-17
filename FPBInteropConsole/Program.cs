@@ -4,8 +4,7 @@ using System.Linq;
 using System.IO;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using FPBInterop;
-using static FPBInterop.OutlookHandling;
+using static FPBInterop.FPBInterop;
 
 
 
@@ -32,8 +31,7 @@ namespace FPBInteropConsole {
                     new TextWriterTraceListener(filePath);
                 Tracer.Listeners.Add(traceToLogFile);
             }
-
-            SetupOutlookRefs();
+            Init();
             UserInputLoop();
         }
 
@@ -91,9 +89,6 @@ namespace FPBInteropConsole {
                     case "formatdates":
                         ReformatMagentoDates(stringArg);
                         break;
-                    case "enumfolders":
-                        EnumerateFolders(flags.Contains("-h"));
-                        break;
                     case "setuptest":
                         if (!hasIntArg) {
                             if (intArg < 1 || intArg > 25) {
@@ -114,18 +109,14 @@ namespace FPBInteropConsole {
                         SaveSelected(stringArg);
                         break;
                     case "stoptest":
-                        StopTestEnv();
+                        StopTest();
                         break;
-                    case "process":
-                        if (String.IsNullOrEmpty(stringArg))
-                            ProcessSelectedOrder();
-                        else
-                            ProcessFolder(stringArg);
+                    case "processfolder":
+                        ProcessFolder(stringArg, flags.Contains("-i"));
                         break;
-
-                    case "ohshit":
-                        RescueMisfiledOrders();
-                        break;                        
+                    case "processitem":
+                        ProcessSelectedOrder();
+                        break;                     
                     /*case "help":
                         ShowHelp();
                         break;*/

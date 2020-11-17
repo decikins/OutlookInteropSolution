@@ -7,17 +7,14 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 
 namespace FPBInterop {
-
-	internal class Product {
+	internal sealed class MagentoProduct {
 		public string Name { get; private set; }
 		public string SKU { get; private set; }
-		public OrderType ProductType { get; private set; }
-		public int Price { get; private set; }
-		public Product(string name, string skuCode, OrderType type, int price) {
+		public ProductType ProductType { get; private set; }
+		public MagentoProduct(string name, string skuCode, ProductType type) {
 			Name = name;
 			SKU = skuCode;
 			ProductType = type;
-			Price = price;
 		}
 	}
 
@@ -33,43 +30,41 @@ namespace FPBInterop {
 		}
 	}
 
-	[Flags]
-	internal enum FilingPriority : byte {
-		NONE = 0,
-		GENERAL = 1,
-		COOKIE = 2,
-		CUSTOM = 4
-    }
-
 	internal class MagentoOrder : BaseOrder { 
-		public List<Product> Products { get; private set; }
+		public List<MagentoProduct> Products { get; private set; }
 		public FilingPriority OrderPriority { get; private set; }
 		public MagentoOrder(Franchise location, 
 							DateTime deliveryDate, 
 							OrderMetadata meta,
-							List<Product> products) 
+							List<MagentoProduct> products) 
 			: base(location,deliveryDate,meta) {
 			Products = products;
 			OrderPriority = FilingPriority.NONE;
-			foreach (Product p in products) {
+			foreach (MagentoProduct p in products) {
 				OrderPriority |= p.ProductType.Priority;
             }
 		}
 	}
 
-	internal abstract class Tier {
-		public CakeFlavour flavour { get; private set; }
-		public SideType side { get; private set; }
-		public Colour sideColour { get; private set; }
+	internal class ExtrasOrder : BaseOrder {
+		public int WhiteBag { get; private set; }
+		public int ChocBag { get; private set; }
+		public int WhiteChocBag { get; private set; }
 
-		public Tier(CakeFlavour flavour, SideType side, Colour colour) {
-			this.flavour = flavour;
-			this.side = side;
-			this.sideColour = colour;
+		public int ChocPlaqueBlank { get; private set; }
+		public int ChocPlaqueBirthday { get; private set; }
+		public List<string> ChocPlaqueCustom { get; private set; }
+		public int SugarPlaqueBlank { get; private set; }
+		public int SugarPlaqueBirthday { get; private set; }
+		public List<string> SugarPlaqueCustom { get; private set; }
+
+		public ExtrasOrder(Franchise location, DateTime deliveryDate, OrderMetadata meta) :
+            base(location, deliveryDate, meta) {
+
         }
-    }
+	}
 
-	internal class DecoratedCakeOrder : BaseOrder
+	internal class DecoratedOrder : BaseOrder
 	{
 		public int OrderNumber { get; private set; }
 		public string SKU { get; private set; }
@@ -79,11 +74,23 @@ namespace FPBInterop {
 		public List<Tier> Tiers { get; private set; }
 		public int Price { get; private set; }
 
-		public DecoratedCakeOrder(
+		public DecoratedOrder(
 			Franchise location,
 			DateTime deliveryDate,
 			OrderMetadata meta) : base(location,deliveryDate,meta)
 		{
+		}
+	}
+
+	internal sealed class Tier {
+		public CakeFlavour flavour { get; private set; }
+		public SideType side { get; private set; }
+		public Colour sideColour { get; private set; }
+
+		public Tier(CakeFlavour flavour, SideType side, Colour colour) {
+			this.flavour = flavour;
+			this.side = side;
+			this.sideColour = colour;
 		}
 	}
 
@@ -96,7 +103,15 @@ namespace FPBInterop {
 		}
 	}
 
-	public enum CakeFlavour
+	[Flags]
+	internal enum FilingPriority : byte {
+		NONE = 0,
+		GENERAL = 1,
+		COOKIE = 2,
+		CUSTOM = 4
+	}
+
+	internal enum CakeFlavour
 	{
 		NONE,
 		ANGELMUD,
@@ -114,7 +129,7 @@ namespace FPBInterop {
 	}
 
 	[Flags]
-	public enum SideType
+	internal enum SideType
 	{
 		None,
 		Fondant,
@@ -123,7 +138,7 @@ namespace FPBInterop {
 		Buttercream
 	}
 
-	public enum SideColour
+	internal enum SideColour
 	{
 		None,
 		Red,
