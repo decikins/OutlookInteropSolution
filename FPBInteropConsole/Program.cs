@@ -6,8 +6,6 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using static FPBInterop.FPBInterop;
 
-
-
 namespace FPBInteropConsole {
 
     static class Program {
@@ -36,7 +34,7 @@ namespace FPBInteropConsole {
         }
 
         private static void UserInputLoop() {
-            Regex rgx = new Regex(@"\b\d*\b");
+            Regex rgx = new Regex(@"\b\d+\b");
             bool ApplicationIsExiting = false;
             string command;
             List<string> flags = new List<string>();
@@ -90,20 +88,7 @@ namespace FPBInteropConsole {
                         ReformatMagentoDates(stringArg);
                         break;
                     case "setuptest":
-                        if (!hasIntArg) {
-                            if (intArg < 1 || intArg > 25) {
-                                Tracer.TraceEvent(TraceEventType.Error, 0, 
-                                    "Maxitems parameter must be non-negative integer greater than 1, less than 25");
-                                break;
-                            }
-                            else
-                                if(SetupDefaultTestEnv(intArg, stringArg) == false) {
-                                Tracer.TraceEvent(TraceEventType.Error, 0, "Setting up test folder failed");
-                            }
-                        }
-                        else
-                            Tracer.TraceEvent(TraceEventType.Error, 0, 
-                                "Please specify maximum number of items to duplicate: \"setuptest\" XX");
+                        SetupDefaultTestEnv(intArg, stringArg);
                         break;
                     case "save":
                         SaveSelected(stringArg);
@@ -112,7 +97,7 @@ namespace FPBInteropConsole {
                         StopTest();
                         break;
                     case "processfolder":
-                        ProcessFolder(stringArg, flags.Contains("-i"));
+                        ProcessFolder(stringArg, flags.Contains("-f"));
                         break;
                     case "processitem":
                         ProcessSelectedOrder();
@@ -139,10 +124,12 @@ namespace FPBInteropConsole {
             }
             while (!ApplicationIsExiting);
         }
+
         private static void ShowHelp() {
             Console.WriteLine("formatdates \"PATH\" OR -f \"PATH\":\n\tFormat dates for Magento orders in the specified\n\tfolder path");
             Console.WriteLine("");
         }
+
         private static List<string> GetFlags(string input) {
             List<string> flags = new List<string>();
             for(int i = input.IndexOf('-'); i >= 0; i = input.IndexOf('-', i + 1)) {
@@ -165,7 +152,6 @@ namespace FPBInteropConsole {
         public override void Write(string message) {
             Trace.Write(message);
         }
-
         public override void WriteLine(string message) {
             Trace.WriteLine(message);
         }
@@ -181,7 +167,6 @@ namespace FPBInteropConsole {
         public NoHeaderLogListener(string logFileName) : base(logFileName) {
             base.Writer = new StreamWriter(logFileName, false);
         }
-
         public override void Write(string message) {
             base.Writer.Write(message);
         }

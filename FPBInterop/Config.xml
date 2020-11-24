@@ -51,34 +51,37 @@
   </sideDecoration>
   <productTypeInfo>
     <standard>
-      <type name="Cupcake" cutoffSpan="2" notAvailableDays="Monday" filingPriority="0"
+      <type name="Undefined" cutoffSpan="0" notAvailableDays="" filingPriority="1" skuTag=""/>
+      <type name="Cupcake" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
             skuTag="DECCUP"/>
-      <type name="Design-a-Drip" cutoffSpan="2" notAvailableDays="Monday" filingPriority="0"
+      <type name="Design-a-Drip" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
             skuTag="DESIGNADRIP"/>
-      <type name="Vanilla Slice" cutoffSpan="2" notAvailableDays="Monday" filingPriority="0"
+      <type name="Vanilla Slice" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
             skuTag="DECVAN"/>
-      <type name="Flourless"      cutoffSpan="2"  notAvailableDays="Monday" filingPriority="0"
+      <type name="Flourless"      cutoffSpan="2"  notAvailableDays="Monday" filingPriority="1"
             skuTag="DECFLO"/>
-      <type name="Vegan"          cutoffSpan="2"  notAvailableDays="Monday" filingPriority="0"
+      <type name="Vegan"          cutoffSpan="2"  notAvailableDays="Monday" filingPriority="1"
             skuTag="DECVEG"/>
-      <type name="Cookie"         cutoffSpan="7"  notAvailableDays="Monday" filingPriority="1"
+      <type name="Cookie"         cutoffSpan="7"  notAvailableDays="Monday" filingPriority="2"
             skuTag="DECCOOK"/>
-      <type name="General Custom" cutoffSpan="7"  notAvailableDays=""       filingPriority="2"
+      <type name="General Custom" cutoffSpan="7"  notAvailableDays=""       filingPriority="4"
             skuTag="GRECUST"/>
-      <type name="Deluxe Custom"  cutoffSpan="14" notAvailableDays=""       filingPriority="2"
+      <type name="Deluxe Custom"  cutoffSpan="14" notAvailableDays=""       filingPriority="4"
             skuTag="BLUCUST"/>
-      <type name="Wedding Custom" cutoffSpan="21" notAvailableDays=""       filingPriority="2"
+      <type name="Wedding Custom" cutoffSpan="21" notAvailableDays=""       filingPriority="4"
             skuTag="DECWED"/>
-      <type name="Photo"          cutoffSpan="2"  notAvailableDays=""       filingPriority="0"
+      <type name="Photo"          cutoffSpan="2"  notAvailableDays=""       filingPriority="1"
             skuTag="PHOTOCAKE"/>
-      <type name="General"        cutoffSpan="0"  notAvailableDays=""       filingPriority="0"
+      <type name="General"        cutoffSpan="0"  notAvailableDays=""       filingPriority="1"
             skuTag="DECGEN"/>
-      <type name="Children"        cutoffSpan="0"  notAvailableDays=""       filingPriority="0"
+      <type name="Children"        cutoffSpan="0"  notAvailableDays=""       filingPriority="1"
             skuTag="DECKID"/>
-      <type name="Sports"        cutoffSpan="0"  notAvailableDays=""       filingPriority="0"
+      <type name="Sports"        cutoffSpan="0"  notAvailableDays=""       filingPriority="1"
             skuTag="DECSPO"/>
-      <type name="Religious"        cutoffSpan="0"  notAvailableDays=""       filingPriority="0"
+      <type name="Religious"        cutoffSpan="0"  notAvailableDays=""       filingPriority="1"
            skuTag="DECREL"/>
+      <type name="Production" cutoffSpan="2"  notAvailableDays="" filingPriority="1"
+            skuTag="Y"/>
     </standard>
     <event>
 

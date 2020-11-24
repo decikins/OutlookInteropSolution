@@ -116,8 +116,6 @@ namespace FPBInterop {
 			return franchises;
 		}
 		internal static Dictionary<string,ProductType> LoadStandardProductTypes() {
-			xml.Load(ConfigXmlPath);
-
 			Dictionary<string, ProductType> types = new Dictionary<string, ProductType>();
 			XmlNode stdTypeXml = xml.SelectSingleNode("//productTypeInfo/standard");
 			foreach (XmlNode node in stdTypeXml) {
@@ -147,7 +145,6 @@ namespace FPBInterop {
 				XmlNode skuTagAttr = node.Attributes.GetNamedItem("skuTag");
 				types.Add(skuTagAttr.Value, new ProductType(name, cutoffSpan, daysNotAvailable, (FilingPriority)filingPriority, skuTagAttr.Value));
 			}
-			xml = null;
 			return types;
 		}
 
@@ -193,26 +190,28 @@ namespace FPBInterop {
 			xml.Save(ConfigXmlPath);
 		}
 
+		internal static Franchise GetFranchiseInfo(string nameOrAlias) {
+			if (Franchises.ContainsKey(nameOrAlias))
+				return Franchises[nameOrAlias];
+			else {
+				foreach (Franchise f in Franchises.Values) {
+					foreach (string alias in f.Aliases) {
+						Tracer.TraceEvent(TraceEventType.Verbose, 0, alias);
+						if (alias == nameOrAlias)
+							return f;
+					}
+				}
+			}
+			throw new ArgumentException($"Store name {nameOrAlias} not found");
+		}
 		internal static ProductType GetProductType(string sku) {
 			foreach(KeyValuePair<string,ProductType> entry in ProductTypesStandard) {
-				if (sku.StartsWith(entry.Key));
+				if (sku.StartsWith(entry.Key))
 					return entry.Value;
             }
-			throw new Exception($"No Product type found that matches SKU {sku}");
+			throw new ArgumentException($"No Product type found that matches SKU {sku}");
 		}
 	}
-
-	[Flags]
-	internal enum DayOfWeekFlag {
-		None = 0,
-		Monday = 1,
-		Tuesday = 2,
-		Wednesday = 4,
-		Thursday = 8,
-		Friday = 16,
-		Saturday = 32,
-		Sunday = 64
-    }
 
 	internal sealed class Franchise {
 		public string StoreName { get; private set; }
@@ -225,7 +224,6 @@ namespace FPBInterop {
 			Aliases = alias;
 		}
 	}
-
 	internal sealed class ProductType {
 		public string Type { get; private set; }
 		public TimeSpan CutoffPeriod { get; private set; }
@@ -244,4 +242,16 @@ namespace FPBInterop {
 			SkuTag = skuTag;
         }
     }
+
+	[Flags]
+	internal enum DayOfWeekFlag {
+		None = 0,
+		Monday = 1,
+		Tuesday = 2,
+		Wednesday = 4,
+		Thursday = 8,
+		Friday = 16,
+		Saturday = 32,
+		Sunday = 64
+	}
 }
