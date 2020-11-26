@@ -225,17 +225,17 @@ namespace FPBInterop {
 		}
 	}
 	internal sealed class ProductType {
-		public string Type { get; private set; }
+		public string Name { get; private set; }
 		public TimeSpan CutoffPeriod { get; private set; }
 		public DayOfWeekFlag DaysNotAvailable { get; private set; }
 		public FilingPriority Priority { get; private set; }
 		public string SkuTag { get; private set; }
-		public ProductType(string type, 
+		public ProductType(string name, 
 						TimeSpan cutoff, 
 						DayOfWeekFlag daysUnavailable, 
 						FilingPriority priority,
 						string skuTag = null) {
-			Type = type;
+			Name = name;
 			CutoffPeriod = cutoff;
 			DaysNotAvailable = daysUnavailable;
 			Priority = priority;

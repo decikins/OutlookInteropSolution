@@ -21,6 +21,7 @@ namespace FPBInterop {
         //Directory.GetParent(Directory.GetCurrentDirectory()).Parent.GetDirectories("Example Orders").First().FullName
 
         private static bool _exitHandlerEnabled = false;
+        private static List<Category> InternalCategories = new List<Category>();
 
         internal const string MagentoFilter = "[SenderEmailAddress]=\"secureorders@fergusonplarre.com.au\"";
 
@@ -162,8 +163,11 @@ namespace FPBInterop {
                 }
                 else {
                     item.UnRead = true;
+                    foreach(MagentoProduct product in order.Products) {
+                        item.AddCategory(InternalCategories.Where(c => c.Name == product.ProductType.Name).Single());
+                    }
                     if (OrderToBeFiled(order))
-                        FileItemForFuture(item);
+                        FileItemForFuture(item, order.OrderPriority);
                 }
             }
         }
@@ -270,11 +274,44 @@ namespace FPBInterop {
                     return true;
             }
         }
-        private static void FileItemForFuture(MailItem item) {
-           // throw new NotImplementedException();
+        private static void FileItemForFuture(MailItem item, FilingPriority priority) {
+            switch (priority) {
+                case FilingPriority.GENERAL:
+                    break;
+                case FilingPriority.COOKIE:
+                    break;
+                case FilingPriority.CUSTOM:
+                    break;
+                case FilingPriority.NONE:
+                default:
+                    break;
+            }
         }
         internal static void SetupCategories() {
-            throw new NotImplementedException();
+            foreach(KeyValuePair<String,ProductType> pair in XmlHandler.ProductTypesStandard) {
+                if (pair.Value.Name == "Undefined")
+                    continue;
+
+                if (CategoryExists(pair.Value.Name)) {
+                    InternalCategories.Add(OutlookApp.Session.Categories[pair.Value.Name]);
+                    continue;
+                } else {
+                    InternalCategories.Add(OutlookApp.Session.Categories.Add(pair.Value.Name));
+                }
+            }
+        }
+        private static bool CategoryExists(string name) {
+            try {
+               Category category =
+                    OutlookApp.Session.Categories[name];
+                if (category != null) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            catch { return false; }
         }
         internal static void ClearCategories() {
             throw new NotImplementedException();
