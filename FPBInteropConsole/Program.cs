@@ -12,7 +12,6 @@ namespace FPBInteropConsole {
 
     /// PROPERTIES ///
         private static string filePath = $"./log.txt {DateTime.Now:dd.MM.yy HH-mm-ss}.txt";
-        private static bool TraceToLogFile;
 
 
         private static readonly ConsoleTraceListener ConsoleTracer = new ConsoleTraceListener();
@@ -21,15 +20,9 @@ namespace FPBInteropConsole {
     /// METHODS ///
 
         static void Main(string[] args) {
-            Tracer.TraceEvent(TraceEventType.Verbose, 0, "Starting FPBInterop console app");
-            TraceToLogFile = args.Contains("-l");
-            Tracer.TraceEvent(TraceEventType.Verbose, 0, $"Write to log set to {TraceToLogFile.ToString().ToLower()}");
-            if (TraceToLogFile) {
-                TextWriterTraceListener traceToLogFile =
-                    new TextWriterTraceListener(filePath);
-                Tracer.Listeners.Add(traceToLogFile);
-            }
-            Init();
+            Tracer.TraceEvent(TraceEventType.Critical, 0, "Starting FPBInterop console app");
+
+            FPBInterop.FPBInterop.Init();
             UserInputLoop();
         }
 
@@ -40,10 +33,6 @@ namespace FPBInteropConsole {
             List<string> flags = new List<string>();
             string stringArg = null;
             int intArg = -1;
-
-            bool hasStringArg = false;
-            bool hasIntArg = false;
-            bool hasFlags = false;
 
             do {
                 Console.Write("->");
@@ -56,11 +45,14 @@ namespace FPBInteropConsole {
                     command = input.Substring(0, input.IndexOf(" "));
                     input = input.Remove(command).Trim(' ');
 
-                    if (input.Contains("\"")) {
+
+                    if (input.Contains("\\"))
+                        input.Replace('\\', '/');
+
+                    if (input.Contains("/")) {
                         try {
                             stringArg = input.Substring(input.IndexOf('"') + 1, 
                                 input.LastIndexOf('"') - (input.IndexOf('"') + 1));
-                            hasStringArg = true;
                             input = input.Remove(stringArg).Trim(' ');
                         }
                         catch (ArgumentOutOfRangeException) {
@@ -73,13 +65,11 @@ namespace FPBInteropConsole {
                     if (intMatch.Success) {
                         intArg = int.Parse(intMatch.Value);
                         Tracer.TraceEvent(TraceEventType.Verbose, 0, "Has int");
-                        hasIntArg = true;
                     }
 
                     if (input.Contains('-')) {
                         flags = GetFlags(input);
                         Tracer.TraceEvent(TraceEventType.Verbose, 0, "Has flags");
-                        hasFlags = true;
                     }
                 }
 
@@ -96,15 +86,15 @@ namespace FPBInteropConsole {
                     case "stoptest":
                         StopTest();
                         break;
+                    case "processmagento":
+                        ProcessFolder("inbox/online orders", flags.Contains("-f"), flags.Contains("-m"));
+                        break;
                     case "processfolder":
-                        ProcessFolder(stringArg, flags.Contains("-f"));
+                        ProcessFolder(stringArg, flags.Contains("-f"),flags.Contains("-m"));
                         break;
                     case "processitem":
                         ProcessSelectedOrder();
                         break;                     
-                    /*case "help":
-                        ShowHelp();
-                        break;*/
                     case "":
                         Console.CursorTop--;
                         Console.WriteLine("");
@@ -117,17 +107,12 @@ namespace FPBInteropConsole {
                         ApplicationIsExiting = true;
                         break;
                     default:
-                        Console.WriteLine("Invalid command; type 'help' for a list of valid commands");
+                        Console.WriteLine("Invalid command");
                         break;
 
                 }
             }
             while (!ApplicationIsExiting);
-        }
-
-        private static void ShowHelp() {
-            Console.WriteLine("formatdates \"PATH\" OR -f \"PATH\":\n\tFormat dates for Magento orders in the specified\n\tfolder path");
-            Console.WriteLine("");
         }
 
         private static List<string> GetFlags(string input) {

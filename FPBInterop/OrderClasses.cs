@@ -30,6 +30,15 @@ namespace FPBInterop {
 		}
 	}
 
+	internal class WufooOrder : BaseOrder {
+		public ProductType Type { get; private set; }
+
+		public WufooOrder(Franchise location, DateTime deliveryDate, OrderMetadata meta, ProductType type) 
+			: base(location, deliveryDate, meta) {
+			Type = type;
+        }
+    }
+
 	internal class MagentoOrder : BaseOrder { 
 		public List<MagentoProduct> Products { get; private set; }
 		public FilingPriority OrderPriority { get; private set; }
@@ -46,25 +55,7 @@ namespace FPBInterop {
 		}
 	}
 
-	internal class ExtrasOrder : BaseOrder {
-		public int WhiteBag { get; private set; }
-		public int ChocBag { get; private set; }
-		public int WhiteChocBag { get; private set; }
-
-		public int ChocPlaqueBlank { get; private set; }
-		public int ChocPlaqueBirthday { get; private set; }
-		public List<string> ChocPlaqueCustom { get; private set; }
-		public int SugarPlaqueBlank { get; private set; }
-		public int SugarPlaqueBirthday { get; private set; }
-		public List<string> SugarPlaqueCustom { get; private set; }
-
-		public ExtrasOrder(Franchise location, DateTime deliveryDate, OrderMetadata meta) :
-            base(location, deliveryDate, meta) {
-
-        }
-	}
-
-	internal class DecoratedOrder : BaseOrder
+	/*internal class DecoratedOrder : WufooOrder
 	{
 		public int OrderNumber { get; private set; }
 		public string SKU { get; private set; }
@@ -77,7 +68,8 @@ namespace FPBInterop {
 		public DecoratedOrder(
 			Franchise location,
 			DateTime deliveryDate,
-			OrderMetadata meta) : base(location,deliveryDate,meta)
+			OrderMetadata meta,
+			ProductType type) : base(location,deliveryDate,meta,type)
 		{
 		}
 	}
@@ -92,7 +84,7 @@ namespace FPBInterop {
 			this.side = side;
 			this.sideColour = colour;
 		}
-	}
+	}*/
 
 	internal sealed class Colour {
 		public string Name { get; private set; }

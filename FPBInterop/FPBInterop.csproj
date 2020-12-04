@@ -44,7 +44,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CakeOrder.cs" />
+    <Compile Include="ExcelHandler.cs" />
+    <Compile Include="OrderClasses.cs" />
     <Compile Include="FPBInterop.cs" />
     <Compile Include="HtmlHandler.cs" />
     <Compile Include="OutlookHandler.cs" />
@@ -93,7 +94,7 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Config.xml">
+    <EmbeddedResource Include="OrderConfig.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>

@@ -54,6 +54,12 @@ namespace FPBInterop {
                 HTMLDoc.LoadHtml(HTMLBody);
                 //_WipeHTMLNodes(HTMLDoc);
 
+                string shop =
+                   HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.Franchise).InnerText.Trim(' ');
+                string deliveryDate =
+                     HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.DeliveryDate).InnerText.Trim(' ');
+                Tracer.TraceEvent(TraceEventType.Information, 0, $"\tShop: {shop}\n\tDate: {deliveryDate}");
+
                 List<MagentoProduct> products = _ReadMagentoProductTable(
                     HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.ProductTable));
 
@@ -61,11 +67,7 @@ namespace FPBInterop {
                 if (products.Count == 0) {
                     meta |= OrderMetadata.DoNotProcess;
                 }
-
-                string shop =
-                    HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.Franchise).InnerText.Trim(' ');
-                string deliveryDate =
-                     HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.DeliveryDate).InnerText.Trim(' ');
+                
                 return new MagentoOrder(
                     XmlHandler.GetFranchiseInfo(shop),
                     DateTime.Parse(deliveryDate),
@@ -74,6 +76,7 @@ namespace FPBInterop {
             }
 
             private static List<MagentoProduct> _ReadMagentoProductTable(HtmlNode productTable) {
+                Tracer.TraceEvent(TraceEventType.Verbose, 0, $"\tProducts:");
                 List<MagentoProduct> products = new List<MagentoProduct>();
                 HtmlNodeCollection rows = productTable.SelectNodes(@".//tr");
 
@@ -99,9 +102,19 @@ namespace FPBInterop {
                     catch (Exception) {
                         continue;
                     }
-
+                    Tracer.TraceEvent(TraceEventType.Verbose, 0, $"\t\t{productName} - {skuCode}");
                     if (!ignoreProduct) {
-                        products.Add(new MagentoProduct(productName, skuCode, XmlHandler.GetProductType(skuCode)));
+                        ProductType type;
+                        try {
+                            type = XmlHandler.GetProductType(skuCode);
+                        }catch (ArgumentException) {
+                            type = XmlHandler.DefaultProductType;
+                            Tracer.TraceEvent(TraceEventType.Warning, 0, 
+                                $"## Product {productName} with SKU code {skuCode} has no ProductType entry,\n" +
+                                $"## or does not match any known skuTag\n" +
+                                $"## Assigned default type, consider adding to Config.xml");
+                        }
+                        products.Add(new MagentoProduct(productName, skuCode, type));
                     }
                     else
                         continue;
@@ -156,6 +169,15 @@ namespace FPBInterop {
                 "//div/table/tbody/tr/td/table/tbody/tr[6]/td/table/tbody/tr/td[2]/strong";
             internal const string Franchise =
                 "//div/table/tbody/tr/td/table/tbody/tr[6]/td/table/tbody/tr/td[1]/strong[1]";
+        }
+        internal static class Wufoo {
+            internal static class DecoratedCake {
+                internal const string OrderNumber = "//div/table/tbody/tr[1]/td/div";
+                internal const string Franchise = "//div/table/tbody/tr[2]/td/div";
+                internal const string DeliveryDate = "//div/table/tbody/tr[7]/td/abbr";
+                internal const string DeliveryDay = "//div/table/tbody/tr[8]/td/div";
+                internal const string Email = "//div/table/tbody/tr[3]/td/a";
+            }
         }
     }
 }

@@ -12,8 +12,9 @@ namespace FPBInterop {
         private const string _testFolderName = "Test";
 
         public static void Init() {
-            OutlookHandler.SetupAppRefs();
             XmlHandler.LoadConfig();
+            OutlookHandler.SetupAppRefs();
+            OutlookHandler.SetupCategories();
         }
 
         public static bool SetupDefaultTestEnv(int maxItems, string sourceItemFilter = null) {
@@ -37,17 +38,20 @@ namespace FPBInterop {
             OutlookHandler.ReformatMagentoDates(GetFolderByPath(folder));
         }
 
-        public static void ProcessFolder(string folderPath, bool forceProcessAllItems) {
-            if (GetFolderByPath(folderPath) == null)
-                return;
-            OutlookHandler.ProcessItems(GetFolderByPath(folderPath).Items, forceProcessAllItems);
+        public static void ProcessFolder(string folderPath, bool forceProcess, bool fileToFolder) {
+            Tracer.TraceEvent(TraceEventType.Information, 0, 
+                $"##\tBEGIN PROCESSING FOLDER {folderPath.ToUpper()}\n" +
+                $"##\tFORCE PROCESS ALL {forceProcess}\n" +
+                $"##\tFILE ITEMS {fileToFolder}");
+            OutlookHandler.ProcessItems(GetFolderByPath(folderPath).Items, forceProcess, fileToFolder);
+            Tracer.TraceEvent(TraceEventType.Information, 0, $"## FOLDER PROCESSING COMPLETE");
         }
         public static void ProcessSelectedOrder() {
             OutlookHandler.ProcessSelectedItem();
         }
 
         public static void SaveSelected(string filename) {
-            OutlookHandler.SaveSelected(filename);
+            Helper.SaveSelected(filename);
         }
     }
 }

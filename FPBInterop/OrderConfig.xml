@@ -51,37 +51,44 @@
   </sideDecoration>
   <productTypeInfo>
     <standard>
-      <type name="Undefined" cutoffSpan="0" notAvailableDays="" filingPriority="1" skuTag=""/>
       <type name="Cupcake" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
-            skuTag="DECCUP"/>
+            skuTag="DECCUP" categorise="true"/>
       <type name="Design-a-Drip" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
-            skuTag="DESIGNADRIP"/>
+            skuTag="DESIGNADRIP" categorise="true"/>
       <type name="Vanilla Slice" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
-            skuTag="DECVAN"/>
+            skuTag="DECVAN" categorise="true"/>
       <type name="Flourless"      cutoffSpan="2"  notAvailableDays="Monday" filingPriority="1"
-            skuTag="DECFLO"/>
+            skuTag="DECFLO" categorise="true"/>
       <type name="Vegan"          cutoffSpan="2"  notAvailableDays="Monday" filingPriority="1"
-            skuTag="DECVEG"/>
+            skuTag="DECVEG" categorise="true"/>
       <type name="Cookie"         cutoffSpan="7"  notAvailableDays="Monday" filingPriority="2"
-            skuTag="DECCOOK"/>
+            skuTag="DECCOOK" categorise="true"/>
       <type name="General Custom" cutoffSpan="7"  notAvailableDays=""       filingPriority="4"
-            skuTag="GRECUST"/>
+            skuTag="GRECUST" categorise="true"/>
       <type name="Deluxe Custom"  cutoffSpan="14" notAvailableDays=""       filingPriority="4"
-            skuTag="BLUCUST"/>
+            skuTag="BLUCUST" categorise="true"/>
       <type name="Wedding Custom" cutoffSpan="21" notAvailableDays=""       filingPriority="4"
-            skuTag="DECWED"/>
+            skuTag="DECWED" categorise="true"/>
       <type name="Photo"          cutoffSpan="2"  notAvailableDays=""       filingPriority="1"
-            skuTag="PHOTOCAKE"/>
+            skuTag="PHOTOCAKE" categorise="true"/>
       <type name="General"        cutoffSpan="0"  notAvailableDays=""       filingPriority="1"
-            skuTag="DECGEN"/>
+            skuTag="DECGEN" categorise="false"/>
       <type name="Children"        cutoffSpan="0"  notAvailableDays=""       filingPriority="1"
-            skuTag="DECKID"/>
+            skuTag="DECKID" categorise="false"/>
       <type name="Sports"        cutoffSpan="0"  notAvailableDays=""       filingPriority="1"
-            skuTag="DECSPO"/>
+            skuTag="DECSPO" categorise="false"/>
       <type name="Religious"        cutoffSpan="0"  notAvailableDays=""       filingPriority="1"
-           skuTag="DECREL"/>
+           skuTag="DECREL" categorise="false"/>
       <type name="Production" cutoffSpan="2"  notAvailableDays="" filingPriority="1"
-            skuTag="Y"/>
+            skuTag="Y0" categorise="true"/>
+      <type name="Berry Delight" cutoffSpan="2" notAvailableDays="" filingPriority="1"
+            skuTag="S03" categorise="false"/>
+      <type name="Unicorn Cupcake" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
+            skuTag="C071" categorise="false"/>
+      <type name="AFL Cupcake" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
+            skuTag="AFLDEC" categorise="false"/>
+      <type name="Extras" cutoffSpan="0" notAvailableDays="Monday" filingPriority="1"
+            skuTag="" categorise="true"/>
     </standard>
     <event>
 

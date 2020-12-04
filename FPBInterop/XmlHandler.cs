@@ -6,59 +6,62 @@ using System.Xml.Serialization;
 
 namespace FPBInterop {
     internal static class XmlHandler {
+		public static readonly ProductType DefaultProductType = new ProductType(
+			"Default", new TimeSpan(), DayOfWeekFlag.None, FilingPriority.GENERAL);
+
 		private static readonly TraceSource Tracer = new TraceSource("FPBInterop.XmlHandling");
 
 		internal static Dictionary<string, Franchise> Franchises;
 		internal static Dictionary<string, Colour> Colours;
 		internal static Dictionary<string, ProductType> ProductTypesStandard;
 
-		private const string ConfigXmlPath = "./Config.xml";
+		private const string OrderConfigXmlPath = "./OrderConfig.xml";
 
 		private static XmlDocument xml = new XmlDocument();
 
 		internal static void LoadConfig() {
-			xml.Load(ConfigXmlPath);
+			xml.Load(OrderConfigXmlPath);
 
 			if (xml.SelectSingleNode("//sideColours") == null)
 				throw new XmlException(
-					$"Config.xml does not contain 'sideColours' node, no colour info loaded");
+					$"OrderConfig.xml does not contain 'sideColours' node, no colour info loaded");
 			else
 				Colours = LoadColours();
 
 			if (xml.SelectSingleNode("//franchises") == null)
 				throw new XmlException(
-					$"Config.xml does not contain 'franchises' node, no franchise info loaded");
+					$"OrderConfig.xml does not contain 'franchises' node, no franchise info loaded");
 			else
 				Franchises = LoadFranchises();
 
 			if (xml.SelectSingleNode("//flavours") == null)
 				throw new XmlException(
-					$"Config.xml does not contain 'flavours' node, no flavour info loaded");
+					$"OrderConfig.xml does not contain 'flavours' node, no flavour info loaded");
 			else;
 				//hasFlavourInfo = true;
 
 			if (xml.SelectSingleNode("//productTypeInfo") == null)
 				throw new XmlException(
-					$"Config.xml does not contain 'productTypeInfo' node, no product type info loaded");
+					$"OrderConfig.xml does not contain 'productTypeInfo' node, no product type info loaded");
 			else
 				ProductTypesStandard = LoadStandardProductTypes();
 		}
 
 		internal static Dictionary<string,Colour> LoadColours() {
-			Tracer.TraceEvent(TraceEventType.Information, 0, $"Begin loading colour table");
+			Tracer.TraceEvent(TraceEventType.Information, 0, $"Loading colour table");
 
 			Dictionary<string, Colour> colours = new Dictionary<string, Colour>();
-			XmlNode sideColours = xml.SelectSingleNode("//sideColours");
+			XmlNode colourNode = xml.SelectSingleNode("//sideColours");
 
-			if (sideColours == null) 
+			if (colourNode == null) 
 				throw new XmlException(
-					$"Config.xml does not contain 'sideColours' node, no colour info loaded");
+					$"OrderConfig.xml does not contain 'sideColours' node, no colour info loaded");
 			
 
 			Tracer.TraceEvent(TraceEventType.Verbose, 0, 
-				$"ColourChart.xml contains {sideColours.ChildNodes.Count} entries");
+				$"OrderConfig.xml contains {colourNode.ChildNodes.Count} entries");
 
-			foreach (XmlNode node in sideColours) {
+			foreach (XmlNode node in colourNode) {
 				if (node.Name != "colour" || node.Attributes.Count == 0)
 					continue;
 
@@ -87,19 +90,25 @@ namespace FPBInterop {
 			return colours;
 		}
 		internal static Dictionary<string,Franchise> LoadFranchises() {
+			Tracer.TraceEvent(TraceEventType.Information, 0, $"Loading franchise table");
 			Dictionary<string, Franchise> franchises = new Dictionary<string, Franchise>();
-			XmlNode franchiseXml = xml.SelectSingleNode("//franchises");
-			foreach (XmlNode node in franchiseXml) {
+			XmlNode franchiseNode = xml.SelectSingleNode("//franchises");
+
+			if (franchiseNode == null)
+				throw new XmlException(
+					$"OrderConfig.xml does not contain 'franchise' node, no franchise info loaded");
+			Tracer.TraceEvent(TraceEventType.Verbose, 0,
+				$"OrderConfig.xml contains {franchiseNode.ChildNodes.Count} entries");
+
+			foreach (XmlNode node in franchiseNode) {
 				if (node.Name != "franchise" || node.Attributes.Count == 0)
 					continue;
 
-				string name;
-				string email;
-				List<string> alias = new List<string>();
-
+				string name = node.Attributes.GetNamedItem("name").Value;
+				string email = node.Attributes.GetNamedItem("email").Value;
 				string aliasString = node.Attributes.GetNamedItem("alias").Value;
-				name = node.Attributes.GetNamedItem("name").Value;
-				email = node.Attributes.GetNamedItem("email").Value;
+
+				List<string> alias = new List<string>();
 				if (!String.IsNullOrEmpty(aliasString)) {
 					if (aliasString.Contains(",")) {
 						string[] aliases = aliasString.Split(',');
@@ -116,9 +125,13 @@ namespace FPBInterop {
 			return franchises;
 		}
 		internal static Dictionary<string,ProductType> LoadStandardProductTypes() {
+			Tracer.TraceEvent(TraceEventType.Information, 0, $"Loading product type table");
 			Dictionary<string, ProductType> types = new Dictionary<string, ProductType>();
-			XmlNode stdTypeXml = xml.SelectSingleNode("//productTypeInfo/standard");
-			foreach (XmlNode node in stdTypeXml) {
+			XmlNode standardTypeNode = xml.SelectSingleNode("//productTypeInfo/standard");
+			Tracer.TraceEvent(TraceEventType.Verbose, 0,
+				$"OrderConfig.xml contains {standardTypeNode.ChildNodes.Count} entries");
+
+			foreach (XmlNode node in standardTypeNode) {
 				if (node.Name != "type" || node.Attributes.Count == 0)
 					continue;
 
@@ -143,7 +156,8 @@ namespace FPBInterop {
 					
 				int filingPriority = int.Parse(node.Attributes.GetNamedItem("filingPriority").Value);
 				XmlNode skuTagAttr = node.Attributes.GetNamedItem("skuTag");
-				types.Add(skuTagAttr.Value, new ProductType(name, cutoffSpan, daysNotAvailable, (FilingPriority)filingPriority, skuTagAttr.Value));
+				bool categorise = bool.Parse(node.Attributes.GetNamedItem("categorise").Value);
+				types.Add(skuTagAttr.Value, new ProductType(name, cutoffSpan, daysNotAvailable, (FilingPriority)filingPriority, skuTagAttr.Value,categorise));
 			}
 			return types;
 		}
@@ -172,7 +186,7 @@ namespace FPBInterop {
 			colour.AppendChild(c);
 
 			xml.DocumentElement.SelectSingleNode("//sideColours").AppendChild(colour);
-			xml.Save(ConfigXmlPath);
+			xml.Save(OrderConfigXmlPath);
 		}
 		internal static void RemoveColour(string name) {
 			try {
@@ -187,7 +201,7 @@ namespace FPBInterop {
 				Tracer.TraceEvent(TraceEventType.Error, 0, e.Message);
 				return;
 			}
-			xml.Save(ConfigXmlPath);
+			xml.Save(OrderConfigXmlPath);
 		}
 
 		internal static Franchise GetFranchiseInfo(string nameOrAlias) {
@@ -196,7 +210,6 @@ namespace FPBInterop {
 			else {
 				foreach (Franchise f in Franchises.Values) {
 					foreach (string alias in f.Aliases) {
-						Tracer.TraceEvent(TraceEventType.Verbose, 0, alias);
 						if (alias == nameOrAlias)
 							return f;
 					}
@@ -230,16 +243,19 @@ namespace FPBInterop {
 		public DayOfWeekFlag DaysNotAvailable { get; private set; }
 		public FilingPriority Priority { get; private set; }
 		public string SkuTag { get; private set; }
+		public bool Categorise { get; private set; }
 		public ProductType(string name, 
 						TimeSpan cutoff, 
 						DayOfWeekFlag daysUnavailable, 
 						FilingPriority priority,
-						string skuTag = null) {
+						string skuTag = null,
+						bool categorise = false) {
 			Name = name;
 			CutoffPeriod = cutoff;
 			DaysNotAvailable = daysUnavailable;
 			Priority = priority;
 			SkuTag = skuTag;
+			Categorise = categorise;
         }
     }
 
