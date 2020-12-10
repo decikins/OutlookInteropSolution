@@ -34,7 +34,6 @@ namespace FPBInterop {
             };
 
         /// METHODS
-
         internal static void SetupAppRefs() {
             OutlookApp = new Application();
             RootFolder = OutlookApp.Session.DefaultStore.GetRootFolder() as Folder;
@@ -48,7 +47,6 @@ namespace FPBInterop {
 
             SetupCategories();
         }
-
         private static void _OutlookHandling_Quit() {
             Tracer.TraceEvent(TraceEventType.Information, 0, "Outlook instance closed, exiting...");
             TestHandler.StopTestEnv();
@@ -157,31 +155,36 @@ namespace FPBInterop {
         internal static void ProcessSelectedItem() {
             ProcessItem((MailItem)OutlookApp.ActiveExplorer().Selection[1], false);
         }
-        internal static void ProcessItem(MailItem item, bool fileItemToFolder) {
+        internal static void ProcessItem(MailItem item, bool fileToFolder) {
             if (item.SenderEmailAddress == "secureorders@fergusonplarre.com.au") {
-                Tracer.TraceEvent(TraceEventType.Verbose, 0, $"Magento Order: {item.Subject.Remove(0, 27)}");
-                _ReformatDate(item);
-                MagentoOrder order = HtmlHandler.Magento.MagentoBuilder(item.HTMLBody);
-                UserProperty parsed = item.UserProperties.Add("AutoProcessed", OlUserPropertyType.olYesNo, false);
-                parsed.Value = true;
-                DisableVisiblePrintUserProp(parsed);
-                item.Save();
-                if (order.Meta.HasFlag(OrderMetadata.DoNotProcess)) {
-                    item.UnRead = false;
-                    item.Move(DeletedItems);
-                }
-                else {
-                    item.UnRead = true;
-                    foreach (MagentoProduct product in order.Products) {
-                        if (product.ProductType.Categorise)
-                            item.AddCategory(InternalCategories.Where(c => c.Name == product.ProductType.Name).First());
-                    }
-                    item.Save();
-                    if (fileItemToFolder && OrderShouldBeFiled(order))
-                        FileItemForFuture(item, order.DeliveryDate, order.OrderPriority);
-                }
+                _ProcessMagento(item, fileToFolder);
             }
             if(item.SenderEmailAddress == "no-reply@wufoo.com") {
+                
+            }
+        }
+
+        private static void _ProcessMagento(MailItem item, bool fileToFolder) {
+            Tracer.TraceEvent(TraceEventType.Verbose, 0, $"Magento Order: {item.Subject.Remove(0, 27)}");
+            _ReformatDate(item);
+            MagentoOrder order = HtmlHandler.Magento.MagentoBuilder(item.HTMLBody);
+            UserProperty parsed = item.UserProperties.Add("AutoProcessed", OlUserPropertyType.olYesNo, false);
+            parsed.Value = true;
+            DisableVisiblePrintUserProp(parsed);
+            item.Save();
+            if (order.Meta.HasFlag(OrderMetadata.DoNotProcess)) {
+                item.UnRead = false;
+                item.Move(DeletedItems);
+            }
+            else {
+                item.UnRead = true;
+                foreach (MagentoProduct product in order.Products) {
+                    if (product.ProductType.Categorise)
+                        item.AddCategory(InternalCategories.Where(c => c.Name == product.ProductType.Name).First());
+                }
+                item.Save();
+                if (fileToFolder && OrderShouldBeFiled(order))
+                    FileItemForFuture(item, order.DeliveryDate, order.OrderPriority);
             }
         }
 
@@ -260,8 +263,6 @@ namespace FPBInterop {
                 item.RemoveAllCategories();
             }
         }
-
-
 
         // MISCELLANEOUS METHODS
 

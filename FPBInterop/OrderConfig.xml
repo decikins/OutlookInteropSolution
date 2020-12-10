@@ -51,24 +51,35 @@
   </sideDecoration>
   <productTypeInfo>
     <standard>
-      <type name="Cupcake" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
-            skuTag="DECCUP" categorise="true"/>
-      <type name="Design-a-Drip" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
-            skuTag="DESIGNADRIP" categorise="true"/>
       <type name="Vanilla Slice" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
             skuTag="DECVAN" categorise="true"/>
-      <type name="Flourless"      cutoffSpan="2"  notAvailableDays="Monday" filingPriority="1"
-            skuTag="DECFLO" categorise="true"/>
-      <type name="Vegan"          cutoffSpan="2"  notAvailableDays="Monday" filingPriority="1"
-            skuTag="DECVEG" categorise="true"/>
+      <!--<group name="Vegan/Flourless" overrideCategory="true">>-->
+        <type name="Flourless"      cutoffSpan="2"  notAvailableDays="Monday" filingPriority="1"
+              skuTag="DECFLO" categorise="true"/>
+        <type name="Vegan"          cutoffSpan="2"  notAvailableDays="Monday" filingPriority="1"
+              skuTag="DECVEG" categorise="true"/>
+      <!--</group>-->
       <type name="Cookie"         cutoffSpan="7"  notAvailableDays="Monday" filingPriority="2"
             skuTag="DECCOOK" categorise="true"/>
-      <type name="General Custom" cutoffSpan="7"  notAvailableDays=""       filingPriority="4"
-            skuTag="GRECUST" categorise="true"/>
-      <type name="Deluxe Custom"  cutoffSpan="14" notAvailableDays=""       filingPriority="4"
-            skuTag="BLUCUST" categorise="true"/>
-      <type name="Wedding Custom" cutoffSpan="21" notAvailableDays=""       filingPriority="4"
-            skuTag="DECWED" categorise="true"/>
+      <!--<group name="Custom Cake" overrideCategory="false">-->
+        <type name="General Custom" cutoffSpan="7"  notAvailableDays=""       filingPriority="4"
+              skuTag="GRECUST" categorise="true"/>
+        <type name="Deluxe Custom"  cutoffSpan="14" notAvailableDays=""       filingPriority="4"
+              skuTag="BLUCUST" categorise="true"/>
+        <type name="Wedding Custom" cutoffSpan="21" notAvailableDays=""       filingPriority="4"
+              skuTag="DECWED" categorise="true"/>
+      <!--</group>-->
+      <type name="Design-a-Drip" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
+            skuTag="DESIGNADRIP" categorise="true"/>
+      <type name="Production" cutoffSpan="2"  notAvailableDays="" filingPriority="1"
+            skuTag="Y0" categorise="true"/>
+      <type name="Berry Delight" cutoffSpan="2" notAvailableDays="" filingPriority="1"
+            skuTag="S03" categorise="false"/>
+      <type name="Unicorn Cupcake" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
+            skuTag="C071" categorise="false"/>
+      <type name="AFL Cupcake" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
+            skuTag="AFLDEC" categorise="false"/>
+      <!--<group name="Celebration Cake" overrideCategory="true">-->
       <type name="Photo"          cutoffSpan="2"  notAvailableDays=""       filingPriority="1"
             skuTag="PHOTOCAKE" categorise="true"/>
       <type name="General"        cutoffSpan="0"  notAvailableDays=""       filingPriority="1"
@@ -79,16 +90,11 @@
             skuTag="DECSPO" categorise="false"/>
       <type name="Religious"        cutoffSpan="0"  notAvailableDays=""       filingPriority="1"
            skuTag="DECREL" categorise="false"/>
-      <type name="Production" cutoffSpan="2"  notAvailableDays="" filingPriority="1"
-            skuTag="Y0" categorise="true"/>
-      <type name="Berry Delight" cutoffSpan="2" notAvailableDays="" filingPriority="1"
-            skuTag="S03" categorise="false"/>
-      <type name="Unicorn Cupcake" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
-            skuTag="C071" categorise="false"/>
-      <type name="AFL Cupcake" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
-            skuTag="AFLDEC" categorise="false"/>
+      <type name="Cupcake" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
+            skuTag="DECCUP" categorise="true"/>
       <type name="Extras" cutoffSpan="0" notAvailableDays="Monday" filingPriority="1"
             skuTag="" categorise="true"/>
+      <!--</group>-->
     </standard>
     <event>
 

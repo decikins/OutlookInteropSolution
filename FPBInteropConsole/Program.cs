@@ -30,13 +30,14 @@ namespace FPBInteropConsole {
             Regex rgx = new Regex(@"\b\d+\b");
             bool ApplicationIsExiting = false;
             string command;
+            string input;
             List<string> flags = new List<string>();
             string stringArg = null;
             int intArg = -1;
 
             do {
                 Console.Write("->");
-                string input = Console.ReadLine();
+                input = Console.ReadLine();
 
                 if (!input.Contains(' '))
                     command = input;

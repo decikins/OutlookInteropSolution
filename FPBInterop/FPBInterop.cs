@@ -39,10 +39,10 @@ namespace FPBInterop {
         }
 
         public static void ProcessFolder(string folderPath, bool forceProcess, bool fileToFolder) {
-            Tracer.TraceEvent(TraceEventType.Information, 0, 
-                $"##\tBEGIN PROCESSING FOLDER {folderPath.ToUpper()}\n" +
-                $"##\tFORCE PROCESS ALL {forceProcess}\n" +
-                $"##\tFILE ITEMS {fileToFolder}");
+            Tracer.TraceEvent(TraceEventType.Information, 0,
+            $"##\tBEGIN PROCESSING FOLDER {folderPath.ToUpper()}\n" +
+            $"##\tFORCE PROCESS ALL {forceProcess}\n" +
+            $"##\tFILE ITEMS {fileToFolder}");
             OutlookHandler.ProcessItems(GetFolderByPath(folderPath).Items, forceProcess, fileToFolder);
             Tracer.TraceEvent(TraceEventType.Information, 0, $"## FOLDER PROCESSING COMPLETE");
         }

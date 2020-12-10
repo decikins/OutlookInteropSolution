@@ -24,6 +24,14 @@ namespace FPBInterop {
         private static readonly TraceSource Tracer = new TraceSource("FPBInterop.HTMLHandling");
 
         internal static class Wufoo {
+            /*internal static WufooOrder WufooBuilder(string HTMLBody) {
+                HtmlDocument HTMLDoc = new HtmlDocument();
+                HTMLDoc.LoadHtml(HTMLBody);
+                _WipeHTMLNodes(HTMLDoc.DocumentNode);
+
+                
+            }*/
+
             private static void _WipeHTMLNodes(HtmlNode baseNode) {
                 baseNode.DescendantsAndSelf().ToList()
                     .ForEach(n => {
@@ -172,7 +180,7 @@ namespace FPBInterop {
         }
         internal static class Wufoo {
             internal static class DecoratedCake {
-                internal const string OrderNumber = "//div/table/tbody/tr[1]/td/div";
+                internal const string OrderNumber = "//div/div/table/tbody/tr[1]/td/div";
                 internal const string Franchise = "//div/table/tbody/tr[2]/td/div";
                 internal const string DeliveryDate = "//div/table/tbody/tr[7]/td/abbr";
                 internal const string DeliveryDay = "//div/table/tbody/tr[8]/td/div";

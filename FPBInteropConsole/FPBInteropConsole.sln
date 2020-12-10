@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "olinteroplib", "..\olintero
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FPBInterop", "..\FPBInterop\FPBInterop.csproj", "{06C118F4-1A81-4C95-B348-957A3CBFBB2B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "..\Test\Test.csproj", "{ACEF7582-C013-4CCE-A3B6-D4B2D46CA703}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{06C118F4-1A81-4C95-B348-957A3CBFBB2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06C118F4-1A81-4C95-B348-957A3CBFBB2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06C118F4-1A81-4C95-B348-957A3CBFBB2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACEF7582-C013-4CCE-A3B6-D4B2D46CA703}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACEF7582-C013-4CCE-A3B6-D4B2D46CA703}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACEF7582-C013-4CCE-A3B6-D4B2D46CA703}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACEF7582-C013-4CCE-A3B6-D4B2D46CA703}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

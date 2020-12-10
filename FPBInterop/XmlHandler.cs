@@ -7,12 +7,12 @@ using System.Xml.Serialization;
 namespace FPBInterop {
     internal static class XmlHandler {
 		public static readonly ProductType DefaultProductType = new ProductType(
-			"Default", new TimeSpan(), DayOfWeekFlag.None, FilingPriority.GENERAL);
+			"Default", FilingPriority.GENERAL);
 
 		private static readonly TraceSource Tracer = new TraceSource("FPBInterop.XmlHandling");
 
 		internal static Dictionary<string, Franchise> Franchises;
-		internal static Dictionary<string, Colour> Colours;
+		//internal static Dictionary<string, Colour> Colours;
 		internal static Dictionary<string, ProductType> ProductTypesStandard;
 
 		private const string OrderConfigXmlPath = "./OrderConfig.xml";
@@ -25,8 +25,8 @@ namespace FPBInterop {
 			if (xml.SelectSingleNode("//sideColours") == null)
 				throw new XmlException(
 					$"OrderConfig.xml does not contain 'sideColours' node, no colour info loaded");
-			else
-				Colours = LoadColours();
+			//else
+				//Colours = LoadColours();
 
 			if (xml.SelectSingleNode("//franchises") == null)
 				throw new XmlException(
@@ -47,7 +47,7 @@ namespace FPBInterop {
 				ProductTypesStandard = LoadStandardProductTypes();
 		}
 
-		internal static Dictionary<string,Colour> LoadColours() {
+		/*internal static Dictionary<string,Colour> LoadColours() {
 			Tracer.TraceEvent(TraceEventType.Information, 0, $"Loading colour table");
 
 			Dictionary<string, Colour> colours = new Dictionary<string, Colour>();
@@ -88,7 +88,7 @@ namespace FPBInterop {
 			Tracer.TraceEvent(TraceEventType.Information, 0,
 				$"Loading ColourChart.xml complete");
 			return colours;
-		}
+		}*/
 		internal static Dictionary<string,Franchise> LoadFranchises() {
 			Tracer.TraceEvent(TraceEventType.Information, 0, $"Loading franchise table");
 			Dictionary<string, Franchise> franchises = new Dictionary<string, Franchise>();
@@ -135,29 +135,15 @@ namespace FPBInterop {
 				if (node.Name != "type" || node.Attributes.Count == 0)
 					continue;
 
-				string name;
-				TimeSpan cutoffSpan;
-				DayOfWeekFlag daysNotAvailable = DayOfWeekFlag.None;
-
-				name = node.Attributes.GetNamedItem("name").Value;
-				cutoffSpan = new TimeSpan(int.Parse(node.Attributes.GetNamedItem("cutoffSpan").Value),0,0,0);
-				string daysString = node.Attributes.GetNamedItem("notAvailableDays").Value;
-				if (!String.IsNullOrEmpty(daysString)) {
-					if (daysString.Contains(",")) {
-						string[] days = daysString.Split(',');
-						foreach (string day in days) {
-							daysNotAvailable |= (DayOfWeekFlag)Enum.Parse(typeof(DayOfWeekFlag), day.Trim(' '));
-						}
-                    }
-                    else {
-						daysNotAvailable = (DayOfWeekFlag)Enum.Parse(typeof(DayOfWeekFlag), daysString);
-					}
-				}
-					
+				string name = node.Attributes.GetNamedItem("name").Value;
 				int filingPriority = int.Parse(node.Attributes.GetNamedItem("filingPriority").Value);
 				XmlNode skuTagAttr = node.Attributes.GetNamedItem("skuTag");
+				if (String.IsNullOrEmpty(skuTagAttr.Value))
+					skuTagAttr.Value = "Not Applicable";
+
 				bool categorise = bool.Parse(node.Attributes.GetNamedItem("categorise").Value);
-				types.Add(skuTagAttr.Value, new ProductType(name, cutoffSpan, daysNotAvailable, (FilingPriority)filingPriority, skuTagAttr.Value,categorise));
+
+				types.Add(skuTagAttr.Value, new ProductType(name, (FilingPriority)filingPriority, skuTagAttr.Value,categorise));
 			}
 			return types;
 		}
@@ -224,6 +210,22 @@ namespace FPBInterop {
             }
 			throw new ArgumentException($"No Product type found that matches SKU {sku}");
 		}
+
+		private static DayOfWeekFlag GetDaysFromStringList(string list) {
+			DayOfWeekFlag daysFlag = DayOfWeekFlag.None;
+			if (!String.IsNullOrEmpty(list)) {
+				if (list.Contains(",")) {
+					string[] days = list.Split(',');
+					foreach (string day in days) {
+						daysFlag |= (DayOfWeekFlag)Enum.Parse(typeof(DayOfWeekFlag), day.Trim(' '));
+					}
+				}
+				else {
+					daysFlag = (DayOfWeekFlag)Enum.Parse(typeof(DayOfWeekFlag), list);
+				}
+			}
+			return daysFlag;
+		}
 	}
 
 	internal sealed class Franchise {
@@ -237,22 +239,17 @@ namespace FPBInterop {
 			Aliases = alias;
 		}
 	}
+
 	internal sealed class ProductType {
 		public string Name { get; private set; }
-		public TimeSpan CutoffPeriod { get; private set; }
-		public DayOfWeekFlag DaysNotAvailable { get; private set; }
 		public FilingPriority Priority { get; private set; }
 		public string SkuTag { get; private set; }
 		public bool Categorise { get; private set; }
 		public ProductType(string name, 
-						TimeSpan cutoff, 
-						DayOfWeekFlag daysUnavailable, 
 						FilingPriority priority,
 						string skuTag = null,
 						bool categorise = false) {
 			Name = name;
-			CutoffPeriod = cutoff;
-			DaysNotAvailable = daysUnavailable;
 			Priority = priority;
 			SkuTag = skuTag;
 			Categorise = categorise;
