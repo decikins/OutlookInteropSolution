@@ -4,7 +4,7 @@ using System.Linq;
 using System.IO;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using static FPBInterop.FPBInterop;
+using FPBInterop;
 
 namespace FPBInteropConsole {
 
@@ -13,7 +13,6 @@ namespace FPBInteropConsole {
     /// PROPERTIES ///
         private static string filePath = $"./log.txt {DateTime.Now:dd.MM.yy HH-mm-ss}.txt";
 
-
         private static readonly ConsoleTraceListener ConsoleTracer = new ConsoleTraceListener();
         private readonly static TraceSource Tracer = new TraceSource("FPBInterop.Console");
 
@@ -21,8 +20,6 @@ namespace FPBInteropConsole {
 
         static void Main(string[] args) {
             Tracer.TraceEvent(TraceEventType.Critical, 0, "Starting FPBInterop console app");
-
-            FPBInterop.FPBInterop.Init();
             UserInputLoop();
         }
 
@@ -75,26 +72,14 @@ namespace FPBInteropConsole {
                 }
 
                 switch (command) {
-                    case "formatdates":
-                        ReformatMagentoDates(stringArg);
-                        break;
-                    case "setuptest":
-                        SetupDefaultTestEnv(intArg, stringArg);
-                        break;
-                    case "save":
-                        SaveSelected(stringArg);
-                        break;
-                    case "stoptest":
-                        StopTest();
-                        break;
                     case "processmagento":
-                        ProcessFolder("inbox/online orders", flags.Contains("-f"), flags.Contains("-m"));
+                        OutlookHandler.ProcessFolder("inbox/online orders", flags.Contains("-f"), flags.Contains("-m"));
                         break;
                     case "processfolder":
-                        ProcessFolder(stringArg, flags.Contains("-f"),flags.Contains("-m"));
+                        OutlookHandler.ProcessFolder(stringArg, flags.Contains("-f"),flags.Contains("-m"));
                         break;
                     case "processitem":
-                        ProcessSelectedOrder();
+                        OutlookHandler.ProcessSelectedOrder(flags.Contains("-f"), flags.Contains("-m"));
                         break;                     
                     case "":
                         Console.CursorTop--;

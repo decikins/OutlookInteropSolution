@@ -12,7 +12,7 @@ namespace FPBInterop {
     internal enum OrderMetadata {
         None = 0,
         DoNotProcess = 1,
-        FileToDateFolder = 2,
+        FiledToFolder = 2,
         DateChanged = 4,
         DetailsChanged = 8,
         StoreChanged = 16,
@@ -21,8 +21,8 @@ namespace FPBInterop {
 
     internal static class HtmlHandler {
 
-        private static readonly TraceSource Tracer = new TraceSource("FPBInterop.HTMLHandling");
-
+        private static readonly TraceSource Tracer = new TraceSource("FPBInterop.HTMLHandler");
+        private static XmlHandler xmlHandle = new XmlHandler();
         internal static class Wufoo {
             /*internal static WufooOrder WufooBuilder(string HTMLBody) {
                 HtmlDocument HTMLDoc = new HtmlDocument();
@@ -75,9 +75,8 @@ namespace FPBInterop {
                 if (products.Count == 0) {
                     meta |= OrderMetadata.DoNotProcess;
                 }
-                
                 return new MagentoOrder(
-                    XmlHandler.GetFranchiseInfo(shop),
+                    xmlHandle.GetFranchiseInfo(shop),
                     DateTime.Parse(deliveryDate),
                     meta,
                     products);
@@ -114,7 +113,7 @@ namespace FPBInterop {
                     if (!ignoreProduct) {
                         ProductType type;
                         try {
-                            type = XmlHandler.GetProductType(skuCode);
+                            type = xmlHandle.GetProductType(skuCode);
                         }catch (ArgumentException) {
                             type = XmlHandler.DefaultProductType;
                             Tracer.TraceEvent(TraceEventType.Warning, 0, 

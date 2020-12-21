@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 
 namespace FPBInterop {
+
 	internal sealed class MagentoProduct {
 		public string Name { get; private set; }
 		public string SKU { get; private set; }
@@ -18,7 +19,13 @@ namespace FPBInterop {
 		}
 	}
 
-	internal class BaseOrder {
+	internal interface IBaseOrder {
+		Franchise Location { get; }
+		DateTime DeliveryDate { get; }
+		OrderMetadata Meta { get; }
+    }
+
+	internal class BaseOrder : IBaseOrder {
 		public Franchise Location { get; private set; }
 		public DateTime DeliveryDate { get; private set; }
 		public OrderMetadata Meta { get; private set; }

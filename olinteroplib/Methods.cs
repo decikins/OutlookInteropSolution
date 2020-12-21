@@ -4,6 +4,7 @@ using Microsoft.Office.Interop.Outlook;
 using System.Diagnostics;
 using System.Reflection;
 using olinteroplib.ExtensionMethods;
+using System.Text;
 using static olinteroplib.Tracer;
 
 namespace olinteroplib
@@ -159,6 +160,68 @@ namespace olinteroplib
                 return f;
             }
 
+            public static Folder GetFolderByPath(this NameSpace session, string path) {
+                StringBuilder msg = new StringBuilder();
+                msg.Append($"Get folder from path input '{path}': ");
+
+                if (!path.Contains("/")) {
+                    try {
+                        Folder target = ((Folder)session.DefaultStore.GetRootFolder()).GetFolder(path);
+                        return target;
+                    }
+                    catch {
+                        msg.Append($"Failed - Invalid folder/path");
+                        TraceOutput.TraceEvent(TraceEventType.Verbose, 0, msg.ToString());
+                        throw new System.IO.DirectoryNotFoundException();
+                    }
+                }
+                char slashChar = '/';
+                Folder root = session.DefaultStore.GetRootFolder() as Folder;
+
+                if (path.StartsWith("/") | path.EndsWith("/"))
+                    path = path.Trim(slashChar);
+
+                string[] folders = path.Split(slashChar);
+
+                Folder folder = root;
+                try {
+                    if (folder != null) {
+                        for (int i = 0; i <= folders.GetUpperBound(0); i++) {
+                            Folders subFolders = folder.Folders;
+                            folder = subFolders.GetFolder(folders[i]);
+                            if (folder == null) {
+                                msg.Append($"Failed - Folder not found at path");
+                                TraceOutput.TraceEvent(TraceEventType.Information, 0, msg.ToString());
+                                throw new System.IO.DirectoryNotFoundException();
+                            }
+                        }
+                    }
+                }
+                catch (System.Exception e) {
+                    msg.Append($"Failed - {e.Message}");
+                    TraceOutput.TraceEvent(TraceEventType.Information, 0, msg.ToString());
+                    throw new System.IO.DirectoryNotFoundException();
+                }
+                msg.Append($"Success");
+                TraceOutput.TraceEvent(TraceEventType.Information, 0, msg.ToString());
+                return folder;
+            }
+            public static Folder CreateFolderAtPath(this NameSpace session, string path, string name = null) {
+                string parentPath = path;
+                if (name == null) {
+                    parentPath = path.Substring(0, path.LastIndexOf("/"));
+                    name = path.Substring(path.LastIndexOf("/"));
+                }
+                try {
+                    Folder newFolder = (Folder)GetFolderByPath(session, parentPath).Folders.Add("name");
+                    return newFolder;
+                }
+                catch (System.IO.DirectoryNotFoundException) {
+                    throw new System.IO.DirectoryNotFoundException(
+                        $"Directory not found, could not create folder at {path}");
+                }
+            }
+
             public static void RemoveFolderUserProperty(this Folder folder, string name) {
                 if (folder.UserDefinedProperties.Count == 0)
                     return;
@@ -224,6 +287,21 @@ namespace olinteroplib
                 item.Categories = "";
                 item.Save();
             }
+            public static bool CategoryExists(this NameSpace session, string name) {
+                try {
+                    Category category =
+                            session.Categories[name];
+                    if (category != null) {
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+                catch { return false; }
+            }
+
+
         }
     }
 }
