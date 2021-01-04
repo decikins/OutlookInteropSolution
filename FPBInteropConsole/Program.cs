@@ -86,6 +86,9 @@ namespace FPBInteropConsole {
                         Console.WriteLine("");
                         Console.CursorTop--;
                         break;
+                    case "saveselected":
+                        OutlookHandler.SaveSelectedHtml();
+                        break;
                     case "x":
                     case "exit":
                     case "quit":

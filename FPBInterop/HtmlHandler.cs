@@ -60,7 +60,7 @@ namespace FPBInterop {
                 HTMLBody = Regex.Replace(HTMLBody, "\n|\r|\t", "");
                 HtmlDocument HTMLDoc = new HtmlDocument();
                 HTMLDoc.LoadHtml(HTMLBody);
-                //_WipeHTMLNodes(HTMLDoc);
+                _WipeHTMLNodes(HTMLDoc.DocumentNode);
 
                 string shop =
                    HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.Franchise).InnerText.Trim(' ');
@@ -171,11 +171,13 @@ namespace FPBInterop {
             internal const string ProductTable =
                 "//div/table/tbody/tr/td/table/tbody/tr[7]/td/span/table";
             internal const string DeliveryTable =
-                "//div/table/tbody/tr/td/table/tbody/tr[6]/td/table/tbody/tr";
+                "//body/div/table/tr/td/table/tr[6]/td/table/tr";
             internal const string DeliveryDate =
                 "//div/table/tbody/tr/td/table/tbody/tr[6]/td/table/tbody/tr/td[2]/strong";
             internal const string Franchise =
                 "//div/table/tbody/tr/td/table/tbody/tr[6]/td/table/tbody/tr/td[1]/strong[1]";
+                //"//body/div/div/table/tr/td/div/table/tr[6]/td/table/tr/td[1]/p/strong/span"
+
         }
         internal static class Wufoo {
             internal static class DecoratedCake {

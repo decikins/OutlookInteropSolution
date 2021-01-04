@@ -48,7 +48,11 @@ namespace FPBInterop {
             }
                 
             public void ProcessFolder(string folderPath) {
-                _ProcessItems(olApp.Session.GetFolderByPath(folderPath).Items);
+                try {
+                    _ProcessItems(olApp.Session.GetFolderByPath(folderPath).Items);
+                }catch(DirectoryNotFoundException) {
+                    Console.WriteLine("Invalid directory - Not found");
+                }
             }
             public void ProcessSelectedItem() {
                 _ProcessItem((MailItem)olApp.ActiveExplorer().Selection[1]);
@@ -72,7 +76,6 @@ namespace FPBInterop {
                 Console.WriteLine("Complete");
             }
             public void _ProcessItem(MailItem item) {
-                Tracer.TraceEvent(TraceEventType.Information, 0, "Test");
                 if (item.SenderEmailAddress == "secureorders@fergusonplarre.com.au") {
                     MagentoOrder order = MagentoProcessor.Process(item);
                     if (order.Meta.HasFlag(OrderMetadata.DoNotProcess)) {
@@ -101,12 +104,12 @@ namespace FPBInterop {
                    Tracer.TraceEvent(TraceEventType.Information, 0, 
                         $"Magento Order: {item.Subject.Remove(0, 27)}");
                     _ReformatDate(item);
-                    MagentoOrder order = HtmlHandler.Magento.MagentoBuilder(item.HTMLBody);
                     UserProperty parsed = 
                         item.UserProperties.Add("AutoProcessed", OlUserPropertyType.olYesNo, false);
                     parsed.Value = true;
                     DisableVisiblePrintUserProp(parsed);
-                    item.Save();
+                    MagentoOrder order = HtmlHandler.Magento.MagentoBuilder(item.HTMLBody);
+                    item.Close(OlInspectorClose.olSave);
                     return order;
                 }
                 private static bool _ReformatDate(MailItem item) {
@@ -221,7 +224,6 @@ namespace FPBInterop {
             void _FileItemForFuture(MailItem item, DateTime date, FilingPriority priority);
         }
 
-
         internal static DateTime GetFirstSundayAfterDate(DateTime date) {
             DateTime sunday = date;
             while (sunday.DayOfWeek != 0) {
@@ -273,6 +275,11 @@ namespace FPBInterop {
                 }
             }
             catch (System.Exception) { }
+        }
+
+        public static void SaveSelectedHtml() {
+            MailItem item = (MailItem)olApp.ActiveExplorer().Selection[1];
+            File.WriteAllText("./test.html", item.HTMLBody);
         }
     }
 }
