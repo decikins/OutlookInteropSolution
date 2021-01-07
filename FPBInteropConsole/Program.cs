@@ -23,6 +23,12 @@ namespace FPBInteropConsole {
             UserInputLoop();
         }
 
+        static void InitShutdown() {
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
+            Environment.Exit(0);
+        }
+
         private static void UserInputLoop() {
             Regex rgx = new Regex(@"\b\d+\b");
             bool ApplicationIsExiting = false;
@@ -87,7 +93,7 @@ namespace FPBInteropConsole {
                         Console.CursorTop--;
                         break;
                     case "saveselected":
-                        OutlookHandler.SaveSelectedHtml();
+                        OutlookHandler.SaveSelectedItemHtml();
                         break;
                     case "x":
                     case "exit":

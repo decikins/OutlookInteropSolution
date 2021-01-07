@@ -8,17 +8,6 @@ using System.Text.RegularExpressions;
 
 
 namespace FPBInterop {
-    [Flags]
-    internal enum OrderMetadata {
-        None = 0,
-        DoNotProcess = 1,
-        FiledToFolder = 2,
-        DateChanged = 4,
-        DetailsChanged = 8,
-        StoreChanged = 16,
-        Cancelled = 32,
-    }
-
     internal static class HtmlHandler {
 
         private static readonly TraceSource Tracer = new TraceSource("FPBInterop.HTMLHandler");
@@ -62,10 +51,18 @@ namespace FPBInterop {
                 HTMLDoc.LoadHtml(HTMLBody);
                 _WipeHTMLNodes(HTMLDoc.DocumentNode);
 
-                string shop =
-                   HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.Franchise).InnerText.Trim(' ');
-                string deliveryDate =
-                     HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.DeliveryDate).InnerText.Trim(' ');
+                HtmlNode shopNode = HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.Franchise);
+                HtmlNode deliveryDateNode = HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.DeliveryDate);
+
+                if (shopNode == null || deliveryDateNode == null) {
+                    string error = $"HTMLAgility.SelectSingleNode failed for Magento form;\n" +
+                        $"Check XPath for shop location/delivery date nodes.";
+                    Tracer.TraceEvent(TraceEventType.Critical, 0, error);
+                    throw new InvalidXPathException(error);
+                }
+
+                string shop = shopNode.InnerText.Trim(' ');
+                string deliveryDate = deliveryDateNode.InnerText.Trim(' ');
                 Tracer.TraceEvent(TraceEventType.Information, 0, $"\tShop: {shop}\n\tDate: {deliveryDate}");
 
                 List<MagentoProduct> products = _ReadMagentoProductTable(
@@ -110,6 +107,7 @@ namespace FPBInterop {
                         continue;
                     }
                     Tracer.TraceEvent(TraceEventType.Verbose, 0, $"\t\t{productName} - {skuCode}");
+
                     if (!ignoreProduct) {
                         ProductType type;
                         try {
@@ -166,18 +164,25 @@ namespace FPBInterop {
         }
     }
 
+    [Flags]
+    internal enum OrderMetadata {
+        None = 0,
+        DoNotProcess = 1,
+        FiledToFolder = 2,
+        DateChanged = 4,
+        DetailsChanged = 8,
+        StoreChanged = 16,
+        Cancelled = 32,
+    }
+
     internal static class XPathInfo {
         internal static class Magento {
             internal const string ProductTable =
                 "//div/table/tbody/tr/td/table/tbody/tr[7]/td/span/table";
-            internal const string DeliveryTable =
-                "//body/div/table/tr/td/table/tr[6]/td/table/tr";
             internal const string DeliveryDate =
                 "//div/table/tbody/tr/td/table/tbody/tr[6]/td/table/tbody/tr/td[2]/strong";
             internal const string Franchise =
                 "//div/table/tbody/tr/td/table/tbody/tr[6]/td/table/tbody/tr/td[1]/strong[1]";
-                //"//body/div/div/table/tr/td/div/table/tr[6]/td/table/tr/td[1]/p/strong/span"
-
         }
         internal static class Wufoo {
             internal static class DecoratedCake {

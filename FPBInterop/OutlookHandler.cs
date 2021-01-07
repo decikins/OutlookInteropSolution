@@ -14,68 +14,65 @@ using olinteroplib.ExtensionMethods;
 
 namespace FPBInterop {
     public static class OutlookHandler {
-        private static XmlHandler xmlHandle = new XmlHandler();
         internal static Application olApp = new Application();
+        private static XmlHandler xmlHandle = new XmlHandler();
         private static readonly TraceSource Tracer = new TraceSource("FPBInterop.OutlookHandler");
 
-
-        //Refactor to remove this internal category list
+        // Refactor to remove this internal category list and figure out
+        // what to do with this UserProperties scheme.
         private static List<Category> InternalCategories = SetupCategories();
 
-        internal const string MagentoFilter = "[SenderEmailAddress]=\"secureorders@fergusonplarre.com.au\"";
-
-        private static List<(string, OlUserPropertyType)> UserProperties =
-            new List<(string, OlUserPropertyType)>() {
-                ("AutoProcessed",OlUserPropertyType.olYesNo)
-            };
+        private static readonly List<(string name, OlUserPropertyType type)> UserProperties =
+            new List<(string name, OlUserPropertyType type)>() {
+                        ("AutoProcessed",OlUserPropertyType.olYesNo)
+        };
 
         public static void ProcessFolder(string folderPath, bool forceProcess, bool fileProcessed) {
-            MailProcessor mProc = new MailProcessor(forceProcess, fileProcessed);
-            mProc.ProcessFolder(folderPath);
+            List<MailItem> items;
+            Folder target;
+            try {
+                target = olApp.Session.GetFolderByPath(folderPath);
+            }
+            catch (DirectoryNotFoundException) {
+                Console.WriteLine("Invalid directory - Not found");
+                return;
+            }
+            items = new List<MailItem>(target.Items.Count);
+            foreach (MailItem item in target.Items) {
+                items.Add(item);
+            }
+            MailReader reader = new MailReader(forceProcess, fileProcessed);
+            reader.ProcessItems(items);
         }
-
         public static void ProcessSelectedOrder(bool forceProcess, bool fileProcessed) {
-            MailProcessor mProc = new MailProcessor(forceProcess, fileProcessed);
-            mProc.ProcessSelectedItem();
+            MailReader reader = new MailReader(forceProcess, fileProcessed);
+            reader.ProcessItems(new List<MailItem>(1) { (MailItem)olApp.ActiveExplorer().Selection[1] });
         }
 
-        internal class MailProcessor {
+        internal class MailReader {
             public bool forceProcessAllItems { get; private set; }
             public bool fileToFolder { get; private set; }
-            public MailProcessor(bool forceProcessAllItems=false,bool fileToFolder=false) {
+            public MailReader(bool forceProcessAllItems = false, bool fileToFolder = false) {
                 this.forceProcessAllItems = forceProcessAllItems;
                 this.fileToFolder = fileToFolder;
             }
-                
-            public void ProcessFolder(string folderPath) {
-                try {
-                    _ProcessItems(olApp.Session.GetFolderByPath(folderPath).Items);
-                }catch(DirectoryNotFoundException) {
-                    Console.WriteLine("Invalid directory - Not found");
-                }
-            }
-            public void ProcessSelectedItem() {
-                _ProcessItem((MailItem)olApp.ActiveExplorer().Selection[1]);
-            }
-            public void _ProcessItems(Items items) {
+
+            public void ProcessItems(List<MailItem> items) {
                 ProgressBar pbar = new ProgressBar();
                 pbar.Report(0);
-                string query = "@SQL=(" + @"http://schemas.microsoft.com/mapi/string/{00020329-0000-0000-C000-000000000046}/AutoProcessed" + " IS NULL)";
-
                 if (!forceProcessAllItems)
-                    items = items.Restrict(query);
+                    items.RemoveAll(i => i.UserProperties.Find("AutoProcessed", true) != null);
 
                 Tracer.TraceEvent(TraceEventType.Verbose, 0, $"{items.Count} items unprocessed");
                 int totalItems = items.Count;
-
-                for (int i = totalItems; i > 0; i--) {
-                    _ProcessItem((MailItem)items[i]);
-                    pbar.Report((double)(totalItems - i) / (double)(totalItems + 1));
+                for (int i = totalItems - 1; i >= 0; i--) {
+                    _ProcessItem(items[i]);
+                    pbar.Report((double)(totalItems - i) / (double)(totalItems));
                 }
                 pbar.Dispose();
                 Console.WriteLine("Complete");
             }
-            public void _ProcessItem(MailItem item) {
+            private void _ProcessItem(MailItem item) {
                 if (item.SenderEmailAddress == "secureorders@fergusonplarre.com.au") {
                     MagentoOrder order = MagentoProcessor.Process(item);
                     if (order.Meta.HasFlag(OrderMetadata.DoNotProcess)) {
@@ -89,7 +86,7 @@ namespace FPBInterop {
                                 item.AddCategory(InternalCategories.Where(
                                     c => c.Name == product.ProductType.Name).First());
                         }
-                        item.Save();
+                        item.Close(OlInspectorClose.olSave);
                     }
                     if (fileToFolder && _OrderShouldBeFiled(order))
                         _FileItemForFuture(item, order.DeliveryDate, order.OrderPriority);
@@ -101,18 +98,43 @@ namespace FPBInterop {
 
             internal static class MagentoProcessor {
                 public static MagentoOrder Process(MailItem item) {
-                   Tracer.TraceEvent(TraceEventType.Information, 0, 
-                        $"Magento Order: {item.Subject.Remove(0, 27)}");
-                    _ReformatDate(item);
-                    UserProperty parsed = 
+                    Tracer.TraceEvent(TraceEventType.Information, 0,
+                         $"Magento Order: {item.Subject.Remove(0, 27)}");
+                    try {
+                        _ReformatDate(item);
+                    }
+                    catch (InvalidDateFormatException) {
+                        Tracer.TraceEvent(TraceEventType.Information, 0,
+                            "Date formatting failed, unrecognized date format");
+                    }
+                    UserProperty parsed =
                         item.UserProperties.Add("AutoProcessed", OlUserPropertyType.olYesNo, false);
                     parsed.Value = true;
                     DisableVisiblePrintUserProp(parsed);
-                    MagentoOrder order = HtmlHandler.Magento.MagentoBuilder(item.HTMLBody);
-                    item.Close(OlInspectorClose.olSave);
+                    MagentoOrder order;
+                    try {
+                        order = HtmlHandler.Magento.MagentoBuilder(item.HTMLBody);
+                    }
+                    catch (InvalidXPathException) {
+                        Console.WriteLine("An error has occured, please check the log file");
+                        return null;
+                    }
+
+                    try {
+                        item.Close(OlInspectorClose.olSave);
+                    }
+                    catch (System.Runtime.InteropServices.COMException) {
+                        Thread.Sleep(5000);
+                        try {
+                            item.Close(OlInspectorClose.olSave);
+                        }
+                        catch (System.Runtime.InteropServices.COMException) {
+                            item.Close(OlInspectorClose.olPromptForSave);
+                        }
+                    }
                     return order;
                 }
-                private static bool _ReformatDate(MailItem item) {
+                private static void _ReformatDate(MailItem item) {
                     CultureInfo provider = CultureInfo.InvariantCulture;
                     DateTime newDate = DateTime.MinValue;
                     string dateMatch;
@@ -128,65 +150,66 @@ namespace FPBInterop {
                             dateMatch = regex.Match(item.HTMLBody).Value;
                             newDate = DateTime.ParseExact(dateMatch, "dddd, dd MMMM yyyy", provider);
                         }
-                        else return false;
+                        else throw new InvalidDateFormatException();
                     }
 
                     string newDateString = newDate.ToString("dddd, d MMMM yyyy");
                     item.HTMLBody = item.HTMLBody.Replace(dateMatch, newDateString);
-                    item.Save();
-                    return true;
+                    item.Close(OlInspectorClose.olSave);
                 }
             }
 
-            public bool _OrderShouldBeFiled(MagentoOrder order) {
+            internal static class WufooProcessor {
+
+            }
+
+            private bool _OrderShouldBeFiled(MagentoOrder order) {
                 if (order.DeliveryDate < GetFirstSundayAfterDate(DateTime.Now).AddDays(1))
-                    return false;
+                    return false; // Order is for this week
                 else {
-                    if (order.OrderPriority == FilingPriority.CUSTOM &&
-                        (DateTime.Now.DayOfWeek != DayOfWeek.Thursday
-                        || DateTime.Now.DayOfWeek != DayOfWeek.Friday))
-                        return false;
-                    else
+                    // Order not for this week, but is custom
+                    if (order.OrderPriority == FilingPriority.CUSTOM
+                        && _FileCustomToday())
                         return true;
+                    else
+                        return false;
                 }
             }
-            public void _FileItemForFuture(MailItem item, DateTime date, FilingPriority priority) {
+
+            private static bool _FileCustomToday() {
+                List<DayOfWeek> CustomOrderDays = new List<DayOfWeek>
+                {DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday};
+                return CustomOrderDays.Contains(DateTime.Now.DayOfWeek);
+            }
+            
+            private void _FileItemForFuture(MailItem item, DateTime date, FilingPriority priority) {
                 Tracer.TraceEvent(TraceEventType.Verbose, 0, $"File order {priority}");
                 string folderPath;
                 Folder destination;
+                string destinationFolderName = FolderNameFromDate(GetFirstSundayAfterDate(date));
                 switch (priority) {
                     case FilingPriority.GENERAL:
-                        // if(date < DateTime.Now.AddDays(7))
-
-                        folderPath = $"inbox/future orders/{FolderNameFromDate(GetFirstSundayAfterDate(date))}";
-                        try {
-                            destination = olApp.Session.GetFolderByPath(folderPath);
-                        }
-                        catch (DirectoryNotFoundException) {
-                            destination = olApp.Session.CreateFolderAtPath(folderPath);
-                        }
-                        SetupUserProperties(destination);
-                        item.Move(destination);
+                        folderPath = 
+                            FolderPaths.FutureGeneralOrders+$"/{destinationFolderName}";
                         break;
                     case FilingPriority.COOKIE:
-                        destination = olApp.Session.GetFolderByPath($"inbox/cookie cakes");
-                        item.Move(destination);
+                        folderPath = FolderPaths.CookieCakes;
                         break;
                     case FilingPriority.CUSTOM:
-                        folderPath = $"inbox/custom orders/{FolderNameFromDate(date)}";
-                        try {
-                            destination = olApp.Session.GetFolderByPath(folderPath);
-                        }
-                        catch (DirectoryNotFoundException) {
-                            destination = olApp.Session.CreateFolderAtPath(folderPath);
-                        }
-                        SetupUserProperties(destination);
-                        item.Move(destination);
+                        folderPath = FolderPaths.FutureCustomOrders+$"/{destinationFolderName}";
                         break;
                     case FilingPriority.NONE:
                     default:
-                        break;
+                        return;
                 }
+                try {
+                    destination = olApp.Session.GetFolderByPath(folderPath);
+                }
+                catch (DirectoryNotFoundException) {
+                    destination = olApp.Session.CreateFolderAtPath(folderPath);
+                }
+                SetupUserProperties(destination);
+                item.Move(destination);
             }
 
             private List<MailItem> _GetFilteredMailList(Folder folder, string restrictFilter) {
@@ -210,18 +233,6 @@ namespace FPBInterop {
 
                 return filteredOrders;
             }
-        }
-
-        internal interface IProcessor {
-            bool forceProcessAllItems { get; }
-            bool fileToFolder { get; }
-            void ProcessFolder(string folderPath);
-            void ProcessSelectedItem();
-            void _ProcessItems(Items items);
-            void _ProcessItem(MailItem item);
-
-            bool _OrderShouldBeFiled(BaseOrder Order);
-            void _FileItemForFuture(MailItem item, DateTime date, FilingPriority priority);
         }
 
         internal static DateTime GetFirstSundayAfterDate(DateTime date) {
@@ -263,7 +274,6 @@ namespace FPBInterop {
         internal static void SetupUserProperties(List<Folder> folders) {
             foreach (Folder folder in folders) {
                 SetupUserProperties(folder);
-                ;
             }
         }
         internal static void SetupUserProperties(Folder folder) {
@@ -277,9 +287,19 @@ namespace FPBInterop {
             catch (System.Exception) { }
         }
 
-        public static void SaveSelectedHtml() {
+        public static void SaveSelectedItemHtml() {
             MailItem item = (MailItem)olApp.ActiveExplorer().Selection[1];
             File.WriteAllText("./test.html", item.HTMLBody);
         }
+    }
+
+    internal static class FolderPaths {
+        internal const string FutureCustomOrders = @"inbox/custom orders";
+        internal const string FutureGeneralOrders = @"inbox/future orders";
+        internal const string CookieCakes = @"inbox/cookie cakes";
+    }
+
+    internal static class DASLQuery {
+        internal const string UserPropertyQuery = @"http://schemas.microsoft.com/mapi/string/{00020329-0000-0000-C000-000000000046}/";
     }
 }
