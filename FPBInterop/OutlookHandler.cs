@@ -69,6 +69,7 @@ namespace FPBInterop {
                     _ProcessItem(items[i]);
                     pbar.Report((double)(totalItems - i) / (double)(totalItems));
                 }
+                Thread.Sleep(1000);
                 pbar.Dispose();
                 Console.WriteLine("Complete");
             }
@@ -164,7 +165,7 @@ namespace FPBInterop {
             }
 
             private bool _OrderShouldBeFiled(MagentoOrder order) {
-                if (order.DeliveryDate < GetFirstSundayAfterDate(DateTime.Now).AddDays(1))
+                if (order.DeliveryDate < FolderNameHandler.GetFirstSundayAfterDate(DateTime.Now).AddDays(1))
                     return false; // Order is for this week
                 else {
                     // Order not for this week, but is custom
@@ -186,7 +187,8 @@ namespace FPBInterop {
                 Tracer.TraceEvent(TraceEventType.Verbose, 0, $"File order {priority}");
                 string folderPath;
                 Folder destination;
-                string destinationFolderName = FolderNameFromDate(GetFirstSundayAfterDate(date));
+                string destinationFolderName = 
+                    FolderNameHandler.FolderNameFromDate(FolderNameHandler.GetFirstSundayAfterDate(date));
                 switch (priority) {
                     case FilingPriority.GENERAL:
                         folderPath = 
@@ -235,20 +237,22 @@ namespace FPBInterop {
             }
         }
 
-        internal static DateTime GetFirstSundayAfterDate(DateTime date) {
-            DateTime sunday = date;
-            while (sunday.DayOfWeek != 0) {
-                sunday = sunday.AddDays(1);
+        internal static class FolderNameHandler {
+            internal static DateTime GetFirstSundayAfterDate(DateTime date) {
+                DateTime sunday = date;
+                while (sunday.DayOfWeek != 0) {
+                    sunday = sunday.AddDays(1);
+                }
+                Tracer.TraceEvent(TraceEventType.Verbose, 0,
+                    $"First Sunday after date {date:dd/MM} is {sunday} ");
+                return sunday;//.ToString("MMM dd").ToUpper(); ;
             }
-            Tracer.TraceEvent(TraceEventType.Verbose, 0,
-                $"First Sunday after date {date:dd/MM} is {sunday} ");
-            return sunday;//.ToString("MMM dd").ToUpper(); ;
-        }
-        internal static string FolderNameFromDate(DateTime date) {
-            if (date.Year > DateTime.Now.Year)
-                return date.ToString("yyyy MMM dd").ToUpper();
-            else
-                return date.ToString("MMM dd").ToUpper();
+            internal static string FolderNameFromDate(DateTime date) {
+                if (date.Year > DateTime.Now.Year)
+                    return date.ToString("yyyy MMM dd").ToUpper();
+                else
+                    return date.ToString("MMM dd").ToUpper();
+            }
         }
 
         internal static List<Category> SetupCategories() {
