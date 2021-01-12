@@ -14,18 +14,15 @@ using olinteroplib.ExtensionMethods;
 
 namespace FPBInterop {
     public static class OutlookHandler {
-        internal static Application olApp = new Application();
-        private static XmlHandler xmlHandle = new XmlHandler();
         private static readonly TraceSource Tracer = new TraceSource("FPBInterop.OutlookHandler");
+        internal static Application olApp = new Application();
+        internal static XmlHandler xmlHandle = new XmlHandler();
+
+        public static Folder GetSelectedFolder { get { return (Folder)olApp.ActiveExplorer().CurrentFolder; } }
 
         // Refactor to remove this internal category list and figure out
         // what to do with this UserProperties scheme.
         private static List<Category> InternalCategories = SetupCategories();
-
-        private static readonly List<(string name, OlUserPropertyType type)> UserProperties =
-            new List<(string name, OlUserPropertyType type)>() {
-                        ("AutoProcessed",OlUserPropertyType.olYesNo)
-        };
 
         public static void ProcessFolder(string folderPath, bool forceProcess, bool fileProcessed) {
             List<MailItem> items;
@@ -275,17 +272,15 @@ namespace FPBInterop {
             throw new NotImplementedException();
         }
 
-        internal static void SetupUserProperties(List<Folder> folders) {
-            foreach (Folder folder in folders) {
-                SetupUserProperties(folder);
-            }
-        }
-        internal static void SetupUserProperties(Folder folder) {
+        public static void SetupUserProperties(Folder folder = null) {
+            if (folder == null)
+                folder = GetSelectedFolder;
             try {
-                foreach ((string, OlUserPropertyType) entry in UserProperties) {
-                    folder.UserDefinedProperties.Add(
-                        entry.Item1,
-                        entry.Item2);
+                foreach ((string name, OlUserPropertyType type) entry in UserPropertyFields.UserProperties) {
+                    if(folder.UserDefinedProperties.Find(entry.name)==null)
+                        folder.UserDefinedProperties.Add(
+                            entry.name,
+                            entry.type);
                 }
             }
             catch (System.Exception) { }
@@ -295,6 +290,14 @@ namespace FPBInterop {
             MailItem item = (MailItem)olApp.ActiveExplorer().Selection[1];
             File.WriteAllText("./test.html", item.HTMLBody);
         }
+    }
+
+    internal static class UserPropertyFields {
+        internal const string CustomFolderViewName = "FPBInteropView";
+        internal static readonly List<(string name, OlUserPropertyType type)> UserProperties =
+            new List<(string name, OlUserPropertyType type)>() {
+                        ("AutoProcessed",OlUserPropertyType.olYesNo)
+        };
     }
 
     internal static class FolderPaths {

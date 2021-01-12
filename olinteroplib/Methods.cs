@@ -23,24 +23,29 @@ namespace olinteroplib
     }
 
     public static class Methods {
-        public static void EnumerateFolders(List<Folder> folderList, Folder startFolder, bool includeHiddenFolders) {
-            TraceOutput.TraceEvent(TraceEventType.Information, 0, $"Enumerating {startFolder.Folders.Count} folders in {startFolder.Name}");
+        public static List<Folder> EnumerateFolders(Folder startFolder, bool includeHiddenFolders, uint maxDepth = 1) {
+            if (maxDepth == 0)
+                return new List<Folder>(0);
+
+            List<Folder> list = new List<Folder>();
             if (!startFolder.HasSubfolders()) {
                 TraceOutput.TraceEvent(TraceEventType.Verbose,0,"No subfolders found in folder specified");
-                return;
+                return new List<Folder>(0);
             }
+            TraceOutput.TraceEvent(TraceEventType.Verbose, 0, $"Found {startFolder.Folders.Count} folders in {startFolder.Name}");
 
             foreach (Folder folder in startFolder.Folders) {
                 if (folder.IsHidden() && !includeHiddenFolders) 
                     continue;
 
-                folderList.Add(folder);
+                list.Add(folder);
                 TraceOutput.TraceEvent(TraceEventType.Information, 0, $"\t{folder.Name}");
 
                 if (folder.Folders.Count > 0) {
-                    EnumerateFolders(folderList, folder, includeHiddenFolders);
+                    list.AddRange(EnumerateFolders(folder, includeHiddenFolders, maxDepth--));
                 }
             }
+            return list;
         }
         public static void DisableVisiblePrintUserProp(UserProperty prop) {
             long printablePropertyFlag = 0x4; // PDO_PRINT_SAVEAS

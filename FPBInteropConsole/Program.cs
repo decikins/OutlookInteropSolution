@@ -95,6 +95,9 @@ namespace FPBInteropConsole {
                     case "saveselected":
                         OutlookHandler.SaveSelectedItemHtml();
                         break;
+                    case "setupuserprops":
+                        OutlookHandler.SetupUserProperties();
+                        break;
                     case "x":
                     case "exit":
                     case "quit":
