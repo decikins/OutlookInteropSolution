@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="ExcelHandler.cs" />
     <Compile Include="Exceptions.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="OrderClasses.cs" />
     <Compile Include="HtmlHandler.cs" />
     <Compile Include="OutlookHandler.cs" />

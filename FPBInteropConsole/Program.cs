@@ -14,11 +14,15 @@ namespace FPBInteropConsole {
         private static string filePath = $"./log.txt {DateTime.Now:dd.MM.yy HH-mm-ss}.txt";
 
         private static readonly ConsoleTraceListener ConsoleTracer = new ConsoleTraceListener();
-        private readonly static TraceSource Tracer = new TraceSource("FPBInterop.Console");
+        private readonly static TraceSource Tracer = new TraceSource("FPBInterop.ConsoleApp");
+        private readonly static NoHeaderLogListener LogListener = new NoHeaderLogListener(filePath);
 
     /// METHODS ///
 
         static void Main(string[] args) {
+            Trace.AutoFlush = true;
+            Tracer.Listeners.Add(LogListener);
+            Logger.Tracer.Listeners.Add(LogListener);
             Tracer.TraceEvent(TraceEventType.Critical, 0, "Starting FPBInterop console app");
             UserInputLoop();
         }

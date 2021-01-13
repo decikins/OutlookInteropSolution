@@ -14,7 +14,6 @@ using olinteroplib.ExtensionMethods;
 
 namespace FPBInterop {
     public static class OutlookHandler {
-        private static readonly TraceSource Tracer = new TraceSource("FPBInterop.OutlookHandler");
         internal static Application olApp = new Application();
         internal static XmlHandler xmlHandle = new XmlHandler();
 
@@ -60,7 +59,7 @@ namespace FPBInterop {
                 if (!forceProcessAllItems)
                     items.RemoveAll(i => i.UserProperties.Find("AutoProcessed", true) != null);
 
-                Tracer.TraceEvent(TraceEventType.Verbose, 0, $"{items.Count} items unprocessed");
+               Logger.TraceEvent(TraceEventType.Verbose, 0, $"{items.Count} items unprocessed");
                 int totalItems = items.Count;
                 for (int i = totalItems - 1; i >= 0; i--) {
                     _ProcessItem(items[i]);
@@ -96,13 +95,13 @@ namespace FPBInterop {
 
             internal static class MagentoProcessor {
                 public static MagentoOrder Process(MailItem item) {
-                    Tracer.TraceEvent(TraceEventType.Information, 0,
+                    Logger.TraceEvent(TraceEventType.Information, 0,
                          $"Magento Order: {item.Subject.Remove(0, 27)}");
                     try {
                         _ReformatDate(item);
                     }
                     catch (InvalidDateFormatException) {
-                        Tracer.TraceEvent(TraceEventType.Information, 0,
+                       Logger.TraceEvent(TraceEventType.Information, 0,
                             "Date formatting failed, unrecognized date format");
                     }
                     UserProperty parsed =
@@ -136,14 +135,17 @@ namespace FPBInterop {
                     CultureInfo provider = CultureInfo.InvariantCulture;
                     DateTime newDate = DateTime.MinValue;
                     string dateMatch;
-                    Regex regex = new Regex(@"\d\d\/\d\d\/\d\d\d\d");
+
+                    Regex regex = new Regex(RegexStrings.FullDate);
+                    if (regex.IsMatch(item.HTMLBody))
+                        return;
 
                     if (regex.IsMatch(item.HTMLBody)) {
                         dateMatch = regex.Match(item.HTMLBody).Value;
                         newDate = DateTime.ParseExact(dateMatch, "dd/MM/yyyy", provider);
                     }
                     else {
-                        regex = new Regex(@"((\w){3,6}day), 0\d ((Jan|Febr)uary|Ma(rch|y)|A(pril|ugust)|Ju(ne|ly)|((Sept|Nov|Dec)em|Octo)ber) (\d){4}");
+                        regex = new Regex(RegexStrings.FullDateLeadingZero);
                         if (regex.IsMatch(item.HTMLBody)) {
                             dateMatch = regex.Match(item.HTMLBody).Value;
                             newDate = DateTime.ParseExact(dateMatch, "dddd, dd MMMM yyyy", provider);
@@ -167,10 +169,10 @@ namespace FPBInterop {
                 else {
                     // Order not for this week, but is custom
                     if (order.OrderPriority == FilingPriority.CUSTOM
-                        && _FileCustomToday())
-                        return true;
-                    else
+                        && !_FileCustomToday())
                         return false;
+                    else
+                        return true;
                 }
             }
 
@@ -181,11 +183,13 @@ namespace FPBInterop {
             }
             
             private void _FileItemForFuture(MailItem item, DateTime date, FilingPriority priority) {
-                Tracer.TraceEvent(TraceEventType.Verbose, 0, $"File order {priority}");
+               Logger.TraceEvent(TraceEventType.Verbose, 0, $"File order {priority}");
                 string folderPath;
                 Folder destination;
                 string destinationFolderName = 
                     FolderNameHandler.FolderNameFromDate(FolderNameHandler.GetFirstSundayAfterDate(date));
+               Logger.TraceEvent(TraceEventType.Verbose, 0, 
+                    $"First Sunday after {date} is {FolderNameHandler.GetFirstSundayAfterDate(date)}");
                 switch (priority) {
                     case FilingPriority.GENERAL:
                         folderPath = 
@@ -208,6 +212,7 @@ namespace FPBInterop {
                     destination = olApp.Session.CreateFolderAtPath(folderPath);
                 }
                 SetupUserProperties(destination);
+                item.Close(OlInspectorClose.olSave);
                 item.Move(destination);
             }
 
@@ -223,11 +228,11 @@ namespace FPBInterop {
                     }
                 }
                 catch (ArgumentException) {
-                    Tracer.TraceEvent(TraceEventType.Information, 0,
+                   Logger.TraceEvent(TraceEventType.Information, 0,
                         $"No items matching filter found in folder {folder.Name}");
                 }
                 catch (System.Exception) {
-                    Tracer.TraceEvent(TraceEventType.Error, 0, "Getting order list failed");
+                   Logger.TraceEvent(TraceEventType.Error, 0, "Getting order list failed");
                 }
 
                 return filteredOrders;
@@ -240,8 +245,6 @@ namespace FPBInterop {
                 while (sunday.DayOfWeek != 0) {
                     sunday = sunday.AddDays(1);
                 }
-                Tracer.TraceEvent(TraceEventType.Verbose, 0,
-                    $"First Sunday after date {date:dd/MM} is {sunday} ");
                 return sunday;//.ToString("MMM dd").ToUpper(); ;
             }
             internal static string FolderNameFromDate(DateTime date) {
@@ -308,5 +311,11 @@ namespace FPBInterop {
 
     internal static class DASLQuery {
         internal const string UserPropertyQuery = @"http://schemas.microsoft.com/mapi/string/{00020329-0000-0000-C000-000000000046}/";
+    }
+
+    internal static class RegexStrings {
+        internal const string ShorthandDate = @"\d\d\/\d\d\/\d\d\d\d";
+        internal const string FullDateLeadingZero = @"((\w){3,6}day), 0\d ((Jan|Febr)uary|Ma(rch|y)|A(pril|ugust)|Ju(ne|ly)|((Sept|Nov|Dec)em|Octo)ber) (\d){4}";
+        internal const string FullDate = @"((\w){3,6}day),(( [1-3][0-9] )|( [1-9] ))((Jan|Febr)uary|Ma(rch|y)|A(pril|ugust)|Ju(ne|ly)|((Sept|Nov|Dec)em|Octo)ber) (\d){4}";
     }
 }

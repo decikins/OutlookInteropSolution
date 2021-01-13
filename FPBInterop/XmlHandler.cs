@@ -7,8 +7,6 @@ using System.Xml.Serialization;
 
 namespace FPBInterop {
     internal class XmlHandler {
-		private static readonly TraceSource Tracer = new TraceSource("FPBInterop.XmlHandler");
-
 		private const string OrderConfigXmlPath = "./OrderConfig.xml";
 
 		private readonly XmlDocument xml = new XmlDocument();
@@ -29,7 +27,7 @@ namespace FPBInterop {
 		}
 
 		/*internal static Dictionary<string,Colour> LoadColours() {
-			Tracer.TraceEvent(TraceEventType.Information, 0, $"Loading colour table");
+			Logger.TraceEvent(TraceEventType.Information, 0, $"Loading colour table");
 
 			Dictionary<string, Colour> colours = new Dictionary<string, Colour>();
 			XmlNode colourNode = xml.SelectSingleNode("//sideColours");
@@ -39,7 +37,7 @@ namespace FPBInterop {
 					$"OrderConfig.xml does not contain 'sideColours' node, no colour info loaded");
 			
 
-			Tracer.TraceEvent(TraceEventType.Verbose, 0, 
+			Logger.TraceEvent(TraceEventType.Verbose, 0, 
 				$"OrderConfig.xml contains {colourNode.ChildNodes.Count} entries");
 
 			foreach (XmlNode node in colourNode) {
@@ -56,7 +54,7 @@ namespace FPBInterop {
 					sprinkle = bool.Parse(node.Attributes.GetNamedItem("sprinkle").Value);
 					coconut = bool.Parse(node.Attributes.GetNamedItem("coconut").Value);
 				} catch(FormatException fe) {
-					Tracer.TraceEvent(TraceEventType.Error, 0, fe.Message);
+					Logger.TraceEvent(TraceEventType.Error, 0, fe.Message);
 					return null;
                 }
 
@@ -66,19 +64,19 @@ namespace FPBInterop {
 
 				colours.Add(name, new Colour(name, sides));
 			}
-			Tracer.TraceEvent(TraceEventType.Information, 0,
+			Logger.TraceEvent(TraceEventType.Information, 0,
 				$"Loading ColourChart.xml complete");
 			return colours;
 		}*/
 		internal Dictionary<string,Franchise> LoadFranchises() {
-			Tracer.TraceEvent(TraceEventType.Information, 0, $"Loading franchise table");
+			Logger.TraceEvent(TraceEventType.Information, 0, $"Loading franchise table");
 			Dictionary<string, Franchise> franchises = new Dictionary<string, Franchise>();
 			XmlNode franchiseNode = xml.SelectSingleNode("//franchises");
 
 			if (franchiseNode == null)
 				throw new XmlException(
 					$"OrderConfig.xml does not contain 'franchise' node, no franchise info loaded");
-			Tracer.TraceEvent(TraceEventType.Verbose, 0,
+			Logger.TraceEvent(TraceEventType.Verbose, 0,
 				$"OrderConfig.xml contains {franchiseNode.ChildNodes.Count} entries");
 
 			foreach (XmlNode node in franchiseNode) {
@@ -106,10 +104,10 @@ namespace FPBInterop {
 			return franchises;
 		}
 		internal Dictionary<string,ProductType> LoadStandardProductTypes() {
-			Tracer.TraceEvent(TraceEventType.Information, 0, $"Loading product type table");
+			Logger.TraceEvent(TraceEventType.Information, 0, $"Loading product type table");
 			Dictionary<string, ProductType> types = new Dictionary<string, ProductType>();
 			XmlNode standardTypeNode = xml.SelectSingleNode("//productTypeInfo/standard");
-			Tracer.TraceEvent(TraceEventType.Verbose, 0,
+			Logger.TraceEvent(TraceEventType.Verbose, 0,
 				$"OrderConfig.xml contains {standardTypeNode.ChildNodes.Count} entries");
 
 			foreach (XmlNode node in standardTypeNode) {

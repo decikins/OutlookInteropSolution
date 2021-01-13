@@ -10,7 +10,6 @@ using System.Text.RegularExpressions;
 namespace FPBInterop {
     internal static class HtmlHandler {
 
-        private static readonly TraceSource Tracer = new TraceSource("FPBInterop.HTMLHandler");
         internal static class Wufoo {
             /*internal static WufooOrder WufooBuilder(string HTMLBody) {
                 HtmlDocument HTMLDoc = new HtmlDocument();
@@ -56,13 +55,13 @@ namespace FPBInterop {
                 if (shopNode == null || deliveryDateNode == null) {
                     string error = $"HTMLAgility.SelectSingleNode failed for Magento form;\n" +
                         $"Check XPath for shop location/delivery date nodes.";
-                    Tracer.TraceEvent(TraceEventType.Critical, 0, error);
+                    Logger.TraceEvent(TraceEventType.Critical, 0, error);
                     throw new InvalidXPathException(error);
                 }
 
                 string shop = shopNode.InnerText.Trim(' ');
                 string deliveryDate = deliveryDateNode.InnerText.Trim(' ');
-                Tracer.TraceEvent(TraceEventType.Information, 0, $"\tShop: {shop}\n\tDate: {deliveryDate}");
+                Logger.TraceEvent(TraceEventType.Information, 0, $"\tShop: {shop}\n\tDate: {deliveryDate}");
 
                 List<MagentoProduct> products = _ReadMagentoProductTable(
                     HTMLDoc.DocumentNode.SelectSingleNode(XPathInfo.Magento.ProductTable));
@@ -79,7 +78,7 @@ namespace FPBInterop {
             }
 
             private static List<MagentoProduct> _ReadMagentoProductTable(HtmlNode productTable) {
-                Tracer.TraceEvent(TraceEventType.Verbose, 0, $"\tProducts:");
+                Logger.TraceEvent(TraceEventType.Verbose, 0, $"\tProducts:");
                 List<MagentoProduct> products = new List<MagentoProduct>();
                 HtmlNodeCollection rows = productTable.SelectNodes(@".//tr");
 
@@ -105,7 +104,7 @@ namespace FPBInterop {
                     catch (Exception) {
                         continue;
                     }
-                    Tracer.TraceEvent(TraceEventType.Verbose, 0, $"\t\t{productName} - {skuCode}");
+                    Logger.TraceEvent(TraceEventType.Verbose, 0, $"\t\t{productName} - {skuCode}");
 
                     if (!ignoreProduct) {
                         ProductType type;
@@ -113,7 +112,7 @@ namespace FPBInterop {
                             type = OutlookHandler.xmlHandle.GetProductType(skuCode);
                         }catch (ArgumentException) {
                             type = XmlHandler.DefaultProductType;
-                            Tracer.TraceEvent(TraceEventType.Warning, 0, 
+                            Logger.TraceEvent(TraceEventType.Warning, 0, 
                                 $"## Product {productName} with SKU code {skuCode} has no ProductType entry,\n" +
                                 $"## or does not match any known skuTag\n" +
                                 $"## Assigned default type, consider adding to Config.xml");
