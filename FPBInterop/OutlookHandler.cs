@@ -9,6 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Runtime.InteropServices;
 using static olinteroplib.Methods;
 using olinteroplib.ExtensionMethods;
 
@@ -23,7 +24,9 @@ namespace FPBInterop {
         // what to do with this UserProperties scheme.
         private static List<Category> InternalCategories = SetupCategories();
 
-        public static void ProcessFolder(string folderPath, bool forceProcess, bool fileProcessed) {
+        public static void ProcessFolder(string folderPath, bool forceProcess, bool moveToFolder) {
+            Logger.TraceEvent(TraceEventType.Verbose, 
+                $"Process folder {folderPath}; Force {forceProcess}; File {moveToFolder}");
             List<MailItem> items;
             Folder target;
             try {
@@ -31,16 +34,22 @@ namespace FPBInterop {
             }
             catch (DirectoryNotFoundException) {
                 Console.WriteLine("Invalid directory - Not found");
+                Logger.TraceEvent(TraceEventType.Error,
+                    $"Folder {folderPath} not found");
                 return;
             }
             items = new List<MailItem>(target.Items.Count);
             foreach (MailItem item in target.Items) {
                 items.Add(item);
             }
-            MailReader reader = new MailReader(forceProcess, fileProcessed);
+            Marshal.ReleaseComObject(target);
+            MailReader reader = new MailReader(forceProcess, moveToFolder);
             reader.ProcessItems(items);
+            Console.WriteLine("Complete");
         }
         public static void ProcessSelectedOrder(bool forceProcess, bool fileProcessed) {
+            Logger.TraceEvent(TraceEventType.Verbose,
+                $"Process selected order: \"{((MailItem)olApp.ActiveExplorer().Selection[1]).Subject}\"");
             MailReader reader = new MailReader(forceProcess, fileProcessed);
             reader.ProcessItems(new List<MailItem>(1) { (MailItem)olApp.ActiveExplorer().Selection[1] });
         }
@@ -59,7 +68,7 @@ namespace FPBInterop {
                 if (!forceProcessAllItems)
                     items.RemoveAll(i => i.UserProperties.Find("AutoProcessed", true) != null);
 
-               Logger.TraceEvent(TraceEventType.Verbose, 0, $"{items.Count} items unprocessed");
+               Logger.TraceEvent(TraceEventType.Verbose, $"{items.Count} items unprocessed");
                 int totalItems = items.Count;
                 for (int i = totalItems - 1; i >= 0; i--) {
                     _ProcessItem(items[i]);
@@ -67,7 +76,6 @@ namespace FPBInterop {
                 }
                 Thread.Sleep(1000);
                 pbar.Dispose();
-                Console.WriteLine("Complete");
             }
             private void _ProcessItem(MailItem item) {
                 if (item.SenderEmailAddress == "secureorders@fergusonplarre.com.au") {
@@ -86,28 +94,29 @@ namespace FPBInterop {
                         item.Close(OlInspectorClose.olSave);
                     }
                     if (fileToFolder && _OrderShouldBeFiled(order))
-                        _FileItemForFuture(item, order.DeliveryDate, order.OrderPriority);
+                        _FileItemForFuture(item, order.DeliveryDate, order.Priority);
                 }
                 if (item.SenderEmailAddress == "no-reply@wufoo.com") {
-
+                    switch (_GetWufooOrderType(item.Subject)) {
+                        case WufooOrderType.Extras:
+                            item.AddCategory()
+                            break;
+                    }
                 }
             }
 
             internal static class MagentoProcessor {
                 public static MagentoOrder Process(MailItem item) {
-                    Logger.TraceEvent(TraceEventType.Information, 0,
+                    Logger.TraceEvent(TraceEventType.Information,
                          $"Magento Order: {item.Subject.Remove(0, 27)}");
                     try {
                         _ReformatDate(item);
                     }
                     catch (InvalidDateFormatException) {
-                       Logger.TraceEvent(TraceEventType.Information, 0,
+                       Logger.TraceEvent(TraceEventType.Error,
                             "Date formatting failed, unrecognized date format");
                     }
-                    UserProperty parsed =
-                        item.UserProperties.Add("AutoProcessed", OlUserPropertyType.olYesNo, false);
-                    parsed.Value = true;
-                    DisableVisiblePrintUserProp(parsed);
+
                     MagentoOrder order;
                     try {
                         order = HtmlHandler.Magento.MagentoBuilder(item.HTMLBody);
@@ -117,16 +126,22 @@ namespace FPBInterop {
                         return null;
                     }
 
+                    UserProperty parsed =
+                        item.UserProperties.Add("AutoProcessed", OlUserPropertyType.olYesNo, false);
+                    parsed.Value = true;
+                    DisableVisiblePrintUserProp(parsed);
+
                     try {
                         item.Close(OlInspectorClose.olSave);
                     }
-                    catch (System.Runtime.InteropServices.COMException) {
-                        Thread.Sleep(5000);
+                    catch (COMException) {
+                        Thread.Sleep(3000);
                         try {
                             item.Close(OlInspectorClose.olSave);
                         }
-                        catch (System.Runtime.InteropServices.COMException) {
-                            item.Close(OlInspectorClose.olPromptForSave);
+                        catch (COMException) {
+                            Logger.TraceEvent(TraceEventType.Error,
+                                $"Unable to save categories, userproperties and/or date formatting to order");
                         }
                     }
                     return order;
@@ -159,36 +174,62 @@ namespace FPBInterop {
                 }
             }
 
-            internal static class WufooProcessor {
+            private static WufooOrderType _GetWufooOrderType(string subject) {
+                if (subject.Contains("Dec Room Extra"))
+                    return WufooOrderType.Extras;
 
+                if (subject.Contains("Design A Drip"))
+                    return WufooOrderType.DesignADrip;
+
+                if (subject.Contains("Vanilla Slice Cake Order Form"))
+                    return WufooOrderType.VanillaSlice;
+
+                if (subject.Contains("Flourless & Vegan Celebration Cake Order Form"))
+                    return WufooOrderType.FlourlessAndVegan;
+
+                if (subject.Contains("Custom Cake Order Form"))
+                    return WufooOrderType.Custom;
+
+                if (subject.Contains("Decorated Cake Order Form"))
+                    return WufooOrderType.Decorated;
+
+                return WufooOrderType.Misc;
             }
 
-            private bool _OrderShouldBeFiled(MagentoOrder order) {
+            private bool _OrderShouldBeFiled(BaseOrder order) {
                 if (order.DeliveryDate < FolderNameHandler.GetFirstSundayAfterDate(DateTime.Now).AddDays(1))
                     return false; // Order is for this week
                 else {
-                    // Order not for this week, but is custom
-                    if (order.OrderPriority == FilingPriority.CUSTOM
-                        && !_FileCustomToday())
-                        return false;
+                    if (order.Priority == FilingPriority.CUSTOM) {
+                        if (order.DeliveryDate > FolderNameHandler.GetFirstSundayAfterDate(DateTime.Now).AddDays(8))
+                            return true;
+                        else {
+                            return _FileCustomToday();
+                        }
+                    }
                     else
                         return true;
                 }
             }
 
+            private static bool _FileGeneralToday() {
+                List<DayOfWeek> GeneralOrderDays = new List<DayOfWeek>(2)
+               {DayOfWeek.Saturday, DayOfWeek.Sunday};
+                return GeneralOrderDays.Contains(DateTime.Now.DayOfWeek);
+            }
             private static bool _FileCustomToday() {
-                List<DayOfWeek> CustomOrderDays = new List<DayOfWeek>
+                List<DayOfWeek> CustomOrderDays = new List<DayOfWeek>(4)
                 {DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday};
-                return CustomOrderDays.Contains(DateTime.Now.DayOfWeek);
+                return !CustomOrderDays.Contains(DateTime.Now.DayOfWeek);
             }
             
             private void _FileItemForFuture(MailItem item, DateTime date, FilingPriority priority) {
-               Logger.TraceEvent(TraceEventType.Verbose, 0, $"File order {priority}");
+               Logger.TraceEvent(TraceEventType.Verbose, $"File order {priority}");
                 string folderPath;
                 Folder destination;
                 string destinationFolderName = 
                     FolderNameHandler.FolderNameFromDate(FolderNameHandler.GetFirstSundayAfterDate(date));
-               Logger.TraceEvent(TraceEventType.Verbose, 0, 
+               Logger.TraceEvent(TraceEventType.Verbose,
                     $"First Sunday after {date} is {FolderNameHandler.GetFirstSundayAfterDate(date)}");
                 switch (priority) {
                     case FilingPriority.GENERAL:
@@ -228,11 +269,11 @@ namespace FPBInterop {
                     }
                 }
                 catch (ArgumentException) {
-                   Logger.TraceEvent(TraceEventType.Information, 0,
+                   Logger.TraceEvent(TraceEventType.Information,
                         $"No items matching filter found in folder {folder.Name}");
                 }
                 catch (System.Exception) {
-                   Logger.TraceEvent(TraceEventType.Error, 0, "Getting order list failed");
+                   Logger.TraceEvent(TraceEventType.Error, "Getting order list failed");
                 }
 
                 return filteredOrders;
@@ -295,6 +336,17 @@ namespace FPBInterop {
         }
     }
 
+    internal enum WufooOrderType {
+        None,
+        Misc,
+        Extras,
+        Decorated,
+        DesignADrip,
+        FlourlessAndVegan,
+        VanillaSlice,
+        Custom
+    }
+
     internal static class UserPropertyFields {
         internal const string CustomFolderViewName = "FPBInteropView";
         internal static readonly List<(string name, OlUserPropertyType type)> UserProperties =
@@ -302,7 +354,6 @@ namespace FPBInterop {
                         ("AutoProcessed",OlUserPropertyType.olYesNo)
         };
     }
-
     internal static class FolderPaths {
         internal const string FutureCustomOrders = @"inbox/custom orders";
         internal const string FutureGeneralOrders = @"inbox/future orders";

@@ -29,6 +29,7 @@ namespace FPBInterop {
 		public Franchise Location { get; private set; }
 		public DateTime DeliveryDate { get; private set; }
 		public OrderMetadata Meta { get; private set; }
+		public FilingPriority Priority { get; }
 
 		public BaseOrder(Franchise location, DateTime deliveryDate, OrderMetadata meta) {
 			Location = location;
@@ -39,7 +40,7 @@ namespace FPBInterop {
 
 	internal class WufooOrder : BaseOrder {
 		public ProductType Type { get; private set; }
-
+		public new FilingPriority Priority { get { return Type.Priority; } }
 		public WufooOrder(Franchise location, DateTime deliveryDate, OrderMetadata meta, ProductType type) 
 			: base(location, deliveryDate, meta) {
 			Type = type;
@@ -48,17 +49,21 @@ namespace FPBInterop {
 
 	internal class MagentoOrder : BaseOrder { 
 		public List<MagentoProduct> Products { get; private set; }
-		public FilingPriority OrderPriority { get; private set; }
+		public new FilingPriority Priority { get {
+				FilingPriority priority = FilingPriority.NONE;
+				foreach (MagentoProduct p in Products) {
+					priority |= p.ProductType.Priority;
+				}
+				return priority;
+			} 
+		}
+
 		public MagentoOrder(Franchise location, 
 							DateTime deliveryDate, 
 							OrderMetadata meta,
 							List<MagentoProduct> products) 
 			: base(location,deliveryDate,meta) {
 			Products = products;
-			OrderPriority = FilingPriority.NONE;
-			foreach (MagentoProduct p in products) {
-				OrderPriority |= p.ProductType.Priority;
-            }
 		}
 	}
 
@@ -108,23 +113,6 @@ namespace FPBInterop {
 		GENERAL = 1,
 		COOKIE = 2,
 		CUSTOM = 4
-	}
-
-	internal enum CakeFlavour
-	{
-		NONE,
-		ANGELMUD,
-		CHOCOLATEMUD,
-		MARBLEMUD,
-		ORANGEMUD,
-		REDVELVET,
-		RAINBOWMUD,
-		CARAMELMUD,
-		RASPBERRYROUGH,
-		VANBUTTERSPONGE,
-		CHOCBUTTERSPONGE,
-		VANFRESHSPONGE,
-		CHOCFRESHSPONGE
 	}
 
 	[Flags]

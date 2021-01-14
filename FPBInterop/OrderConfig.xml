@@ -1,54 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <xml>
-  <sideColours>
-    <colour name="None"           fondant="false" sprinkle="false"  coconut="false"/>
-    <colour name="Red"            fondant="true"  sprinkle="true"   coconut="false"/>
-    <colour name="Hot Pink"       fondant="true"  sprinkle="true"   coconut="false"/>
-    <colour name="Pale Pink"      fondant="true"  sprinkle="true"   coconut="true"/>
-    <colour name="Purple"         fondant="true"  sprinkle="false"  coconut="false"/>
-    <colour name="Pale Purple"    fondant="true"  sprinkle="true"   coconut="true"/>
-    <colour name="Navy Blue"      fondant="true"  sprinkle="false"  coconut="false"/>
-    <colour name="Royal Blue"     fondant="true"  sprinkle="true"   coconut="false"/>
-    <colour name="Satin Blue"     fondant="true"  sprinkle="false"  coconut="false"/>
-    <colour name="Pale Blue"      fondant="true"  sprinkle="true"   coconut="true"/>
-    <colour name="Aqua Blue"      fondant="true"  sprinkle="false"  coconut="false"/>
-    <colour name="Emerald Green"  fondant="true"  sprinkle="false"  coconut="false"/>
-    <colour name="Grass Green"    fondant="false" sprinkle="true"   coconut="false"/>
-    <colour name="Pale Green"     fondant="true"  sprinkle="false"  coconut="true"/>
-    <colour name="Kelly Green"    fondant="true"  sprinkle="false"  coconut="false"/>
-    <colour name="Yellow"         fondant="true"  sprinkle="true"   coconut="false"/>
-    <colour name="Pale Yellow"    fondant="true"  sprinkle="false"  coconut="true"/>
-    <colour name="Orange"         fondant="true"  sprinkle="true"   coconut="false"/>
-    <colour name="Pale Orange"    fondant="false" sprinkle="false"  coconut="true"/>
-    <colour name="Chocolate"      fondant="true"  sprinkle="true"   coconut="false"/>
-    <colour name="Black"          fondant="true"  sprinkle="true"   coconut="false"/>
-    <colour name="Grey"           fondant="true"  sprinkle="false"  coconut="false"/>
-    <colour name="White"          fondant="true"  sprinkle="false"  coconut="true"/>
-    <colour name="Marbled"        fondant="true"  sprinkle="false"  coconut="false"/>
-  </sideColours>
-  <flavours>
-    <flavour name="None"            canBeIced="false" canMultipleTier="false" canSupportMud="false"/>
-    <flavour name="Angel Mud"       canBeIced="true"  canMultipleTier="true"  canSupportMud="true"/>
-    <flavour name="Chocolate Mud"   canBeIced="true"  canMultipleTier="true"  canSupportMud="true"/>
-    <flavour name="Marble Mud"      canBeIced="true"  canMultipleTier="true"  canSupportMud="true"/>
-    <flavour name="Orange Mud"      canBeIced="true"  canMultipleTier="true"  canSupportMud="true"/>
-    <flavour name="Red Velvet"      canBeIced="true"  canMultipleTier="true"  canSupportMud="true"/>
-    <flavour name="Rainbow Mud"     canBeIced="true"  canMultipleTier="true"  canSupportMud="true"/>
-    <flavour name="Caramel Mud"     canBeIced="true"  canMultipleTier="true"  canSupportMud="true"/>
-    <flavour name="Raspberry Rough" canBeIced="true"  canMultipleTier="true"  canSupportMud="true"/>
-    <flavour name="Vanilla Buttercream Sponge"    canBeIced="true"  canMultipleTier="true"  canSupportMud="false"/>
-    <flavour name="Chocolate Buttercream Sponge"  canBeIced="true"  canMultipleTier="true"  canSupportMud="false"/>
-    <flavour name="Vanilla Fresh Cream Sponge"    canBeIced="false" canMultipleTier="true"  canSupportMud="false"/>
-    <flavour name="Chocolate Fresh Cream Sponge"  canBeIced="false" canMultipleTier="true"  canSupportMud="false"/>
-  </flavours>
-  <sideDecoration>
-    <side name="None"/>
-    <side name="Fully Iced"/>
-    <side name="Sprinkles"/>
-    <side name="Coconut"/>
-    <side name="Buttercream"/>
-    <side name="Naked"/>
-  </sideDecoration>
   <productTypeInfo>
     <standard>
       <type name="Vanilla Slice" cutoffSpan="2" notAvailableDays="Monday" filingPriority="1"
@@ -186,4 +137,11 @@
     <franchise name="Whittlesea" email="whittlesea" daysClosed="" alias=""/>
     <franchise name="Woodgrove" email="woodgrove" daysClosed="" alias=""/>
   </franchises>
+  <orderTypeInfo>
+    <typeGroup name="Wufoo" senderAdress ="no-reply@wufoo.com">
+      <type name="Extras">
+        <descriptor key="Subject" match="Dec Room Extra"/>
+      </type>
+    </typeGroup>
+  </orderTypeInfo>
 </xml>

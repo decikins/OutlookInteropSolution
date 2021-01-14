@@ -5,6 +5,8 @@ using System.IO;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using FPBInterop;
+using static FPBInterop.NoHeaderLogListener;
+using static FPBInterop.NoHeaderTraceListener;
 
 namespace FPBInteropConsole {
 
@@ -132,36 +134,6 @@ namespace FPBInteropConsole {
                 throw new ArgumentException("String does not contain the provided text");
 
             return (s.Remove(s.IndexOf(substring), substring.Count()));
-        }
-    }
-
-    public class NoHeaderTraceListener : TraceListener {
-        public override void Write(string message) {
-            Trace.Write(message);
-        }
-        public override void WriteLine(string message) {
-            Trace.WriteLine(message);
-        }
-        public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message) {
-            Trace.WriteLine($"{message}");
-        }
-        public void TraceEvent(string message) {
-            Trace.WriteLine(message);
-        }
-    }
-
-    public class NoHeaderLogListener : TextWriterTraceListener {
-        public NoHeaderLogListener(string logFileName) : base(logFileName) {
-            base.Writer = new StreamWriter(logFileName, false);
-        }
-        public override void Write(string message) {
-            base.Writer.Write(message);
-        }
-        public override void WriteLine(string message) {
-            base.Writer.WriteLine(message);
-        }
-        public override void TraceEvent(TraceEventCache eventCache, string source, TraceEventType eventType, int id, string message) {
-            base.Writer.WriteLine(message);
         }
     }
 }
