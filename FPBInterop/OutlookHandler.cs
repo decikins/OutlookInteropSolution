@@ -99,7 +99,6 @@ namespace FPBInterop {
                 if (item.SenderEmailAddress == "no-reply@wufoo.com") {
                     switch (_GetWufooOrderType(item.Subject)) {
                         case WufooOrderType.Extras:
-                            item.AddCategory()
                             break;
                     }
                 }
@@ -207,8 +206,11 @@ namespace FPBInterop {
                             return _FileCustomToday();
                         }
                     }
-                    else
-                        return true;
+                    else if (order.Priority == FilingPriority.COOKIE) {
+                        if (order.DeliveryDate > FolderNameHandler.GetFirstSundayAfterDate(DateTime.Now).AddDays(1))
+                            return true;
+                        else
+                    }
                 }
             }
 
@@ -281,12 +283,14 @@ namespace FPBInterop {
         }
 
         internal static class FolderNameHandler {
+            internal static DateTime GetFirstDayOfWeekAfterDate(DateTime date, DayOfWeek day) {
+                DateTime d = date;
+                while (d.DayOfWeek != day)
+                    d = d.AddDays(1);
+                return d;
+            }
             internal static DateTime GetFirstSundayAfterDate(DateTime date) {
-                DateTime sunday = date;
-                while (sunday.DayOfWeek != 0) {
-                    sunday = sunday.AddDays(1);
-                }
-                return sunday;//.ToString("MMM dd").ToUpper(); ;
+                return GetFirstDayOfWeekAfterDate(date,DayOfWeek.Sunday);//.ToString("MMM dd").ToUpper(); ;
             }
             internal static string FolderNameFromDate(DateTime date) {
                 if (date.Year > DateTime.Now.Year)

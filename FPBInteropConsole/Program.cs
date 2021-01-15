@@ -15,7 +15,6 @@ namespace FPBInteropConsole {
     /// PROPERTIES ///
         private static string filePath = $"./log.txt {DateTime.Now:dd.MM.yy HH-mm-ss}.txt";
 
-        private static readonly ConsoleTraceListener ConsoleTracer = new ConsoleTraceListener();
         private readonly static TraceSource Tracer = new TraceSource("FPBInterop.ConsoleApp");
         private readonly static NoHeaderLogListener LogListener = new NoHeaderLogListener(filePath);
 
